@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交互式目录（悬停曲线动画）</title>
+    <style>
+        /* 容器样式 */
+        .catalog-container {
+            position: relative;
+            width: 1000px;
+            height: 600px;
+            margin: 50px auto;
+            border: 2px solid #eee;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* 背景图片样式 */
+        .catalog-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* 圆点基础样式 */
+        .dot {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-color: #ff4757;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        /* 中心圆点特殊样式 */
+        .dot.center {
+            background-color: #2ecc71;
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);
+        }
+
+        /* 鼠标悬停圆点时的放大效果 */
+        .dot:hover {
+            transform: scale(1.3);
+            background-color: #ff3742;
+        }
+
+        .dot.center:hover {
+            background-color: #27ae60;
+        }
+
+        /* 提示框基础样式 */
+        .tooltip {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 12px;
+            background-color: #333;
+            color: #fff;
+            font-size: 14px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 20;
+            text-decoration: none;
+        }
+
+        /* 鼠标悬停显示提示框 */
+        .dot:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+            top: -45px;
+        }
+
+        /* 提示框小三角 */
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #333;
+        }
+
+        /* SVG连线容器 */
+        #line-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* 曲线样式与动画 */
+        .connect-curve {
+            fill: none;
+            stroke: #e74c3c; /* 红色曲线 */
+            stroke-width: 2;  /* 曲线粗细 */
+            /* 关键：实现绘制动画 */
+            stroke-dasharray: 1000; /* 一个足够大的值，覆盖曲线总长 */
+            stroke-dashoffset: 1000; /* 初始时完全隐藏 */
+            animation: draw 2.8s ease forwards; /* 执行绘制动画 */
+        }
+
+        /* 定义绘制动画 */
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0; /* 动画结束时完全显示 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="catalog-container">
+        <img src="miso_map.png" alt="目录背景图" class="catalog-bg">
+        <svg id="line-svg"></svg>
+
+        <!-- 圆点1：中心圆点 -->
+        <div class="dot center" style="top: 300px; left: 835px;">
+            <a href="建筑.html" class="tooltip">南山市概况（当前地图还未标上建筑名称）</a>
+        </div>
+
+        <!-- 圆点2：产品介绍 -->
+        <div class="dot" style="top: 200px; left: 500px;">
+            <a href="http://www.unizhang.icu/%E9%80%92%E5%BD%92%E5%9B%9E%E5%A3%B0/index.html" class="tooltip">递归回声</a>
+        </div>
+
+        <!-- 圆点3：关于我们 -->
+        <div class="dot" style="top: 350px; left: 700px;">
+            <a href="https://sylvie-seven-cq.top/" class="tooltip">栖乔宇宙</a>
+        </div>
+
+        <!-- 圆点4：联系我们 -->
+        <div class="dot" style="top: 450px; left: 300px;">
+            <a href="website1.html" class="tooltip">返回浏览器</a>
+        </div>
+    </div>
+
+    <script>
+        const svg = document.getElementById('line-svg');
+        const centerDot = document.querySelector('.dot.center');
+        const allDots = document.querySelectorAll('.dot');
+
+        // 绘制平滑曲线的函数
+        function drawCurve(targetDot) {
+            svg.innerHTML = ''; // 清除旧曲线
+
+            // 获取中心圆点坐标
+            const centerRect = centerDot.getBoundingClientRect();
+            const containerRect = centerDot.closest('.catalog-container').getBoundingClientRect();
+            const centerX = centerRect.left - containerRect.left + centerRect.width / 2;
+            const centerY = centerRect.top - containerRect.top + centerRect.height / 2;
+
+            // 获取目标圆点坐标
+            const targetRect = targetDot.getBoundingClientRect();
+            const targetX = targetRect.left - containerRect.left + targetRect.width / 2;
+            const targetY = targetRect.top - containerRect.top + targetRect.height / 2;
+
+            // 计算贝塞尔曲线的控制点（使曲线平滑向上/下弯曲）
+            const controlX = (centerX + targetX) / 2; // 水平中点
+            const controlY = Math.min(centerY, targetY) - 50; // 控制点在两点上方50px处，形成向上的弧线
+
+            // 创建SVG路径元素
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            // 设置路径数据：M(起点) Q(控制点, 终点)
+            const pathData = `M ${centerX} ${centerY} Q ${controlX} ${controlY} ${targetX} ${targetY}`;
+            path.setAttribute('d', pathData);
+            path.setAttribute('class', 'connect-curve');
+
+            svg.appendChild(path);
+        }
+
+        // 为所有圆点绑定事件
+        allDots.forEach(dot => {
+            // 鼠标悬停时绘制曲线
+            dot.addEventListener('mouseover', function() {
+                drawCurve(this);
+            });
+
+            // 鼠标离开时清除曲线
+            dot.addEventListener('mouseout', function() {
+                svg.innerHTML = '';
+            });
+        });
+    </script>
+</body>
+</html>

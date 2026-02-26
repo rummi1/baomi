@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Open Three</title>
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://threejs.org/build/three.module.min.js",
+        "three/examples/jsm/": "https://threejs.org/examples/jsm/",
+        "tween.js": "https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.6.4/dist/tween.esm.js"
+    }
+}
+</script>
+<style>
+    body {
+        margin: 0;
+        padding: 1px;
+        box-sizing: border-box;
+        background-color: #1f1f1f;
+        display: flex;
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
+    #box {
+        width: 100%;
+        height: 100%;
+    }
+    /* 新增：交互相关样式 */
+    #info-panel {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 15px;
+        border-radius: 5px;
+        max-width: 300px;
+        display: none;
+        font-family: Arial, sans-serif;
+    }
+    #reset-view {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        z-index: 10;
+    }
+    #reset-view:hover {
+        background-color: #2980b9;
+    }
+    .loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        color: white;
+        z-index: 10;
+    }
+</style>
+</head>
+<body>
+<div id="box"></div>
+<!-- 新增：信息面板和重置按钮 -->
+<div id="info-panel">
+    <h2 id="building-name">建筑名称</h2>
+    <p id="building-description">点击建筑查看详情</p>
+</div>
+<button id="reset-view">重置视角</button>
+<div class="loading">加载中...</div>
+
+<script type="module">
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
+import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
+import * as TWEEN from 'tween.js'; // 导入Tween.js
+
+const box = document.getElementById('box')
+
+// ========== 基础场景初始化（优化初始视角：能看到整个模型） ==========
+const scene = new THREE.Scene()
+// 调整相机初始参数：视角、远近裁剪面适配大型模型
+const camera = new THREE.PerspectiveCamera(60, box.clientWidth / box.clientHeight, 1, 10000)
+// 初始相机位置：远离模型中心，能完整看到整个GLB模型（可根据模型实际大小微调）
+camera.position.set(70, 80, 20)
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+renderer.setPixelRatio(window.devicePixelRatio * 1.3)
+renderer.setSize(box.clientWidth, box.clientHeight)
+box.appendChild(renderer.domElement)
+
+// 改为变量存储Controls，方便后续控制
+const controls = new OrbitControls(camera, renderer.domElement)
+controls.enableDamping = true; // 开启阻尼，视角移动更丝滑
+controls.dampingFactor = 0.05;
+controls.screenSpacePanning = false; // 禁止屏幕空间平移，保持3D空间操作逻辑
+controls.minDistance = 10; // 最小缩放距离
+controls.maxDistance = 100; // 最大缩放距离
+// 初始控制器目标：模型中心（0,0,0），保证初始视角看向模型整体
+controls.target.set(0, 0, 0);
+
+scene.add(new THREE.AxesHelper(100))
+
+// ========== 新增：交互核心变量 ==========
+const raycaster = new THREE.Raycaster(); // 射线检测器
+const mouse = new THREE.Vector2(); // 鼠标坐标
+let clickableBuildings = []; // 存储可点击的建筑Mesh
+let selectedBuilding = null; // 当前选中的建筑
+const initialCameraPos = camera.position.clone(); // 初始相机位置
+const initialControlsTarget = controls.target.clone(); // 初始控制器目标
+
+// ========== 天空盒（保留原有逻辑） ==========
+const urls = [0, 1, 2, 3, 4, 5].map(k => (`https://file.threehub.cn/` + 'files/sky/skyBox0/' + (k + 1) + '.png'));
+const textureCube = new THREE.CubeTextureLoader().load(urls);
+
+// ========== 加载GLB模型（优化可点击标记+描边逻辑） ==========
+new GLTFLoader().load('city_model_full (1).glb', (gltf) => {
+    const model = gltf.scene
+    model.traverse((child) => {
+        if (child.isMesh) {
+            // 原有描边逻辑
+            child.material.envMap = textureCube
+            const { geometry } = child
+            const edges = new THREE.EdgesGeometry(geometry)
+            let lineGeometry = new LineSegmentsGeometry().fromEdgesGeometry(edges)
+            const material = new LineMaterial({
+                color: 0xfcde8c,
+                linewidth: 2.5,
+                envMap: textureCube,
+                resolution: new THREE.Vector2(box.clientWidth, box.clientHeight)
+            })
+            const lines = new LineSegments2(lineGeometry, material)
+            lines.computeLineDistances()
+            lines.applyMatrix4(child.matrixWorld)
+            scene.add(lines)
+
+            // 优化：更合理的建筑信息赋值（基于mesh名称）
+            child.userData = {
+                name: child.name || `建筑${clickableBuildings.length + 1}`,
+                description: `这是【${child.name || '未命名'}】建筑，点击可聚焦视角，再次点击或点击空白处重置`
+            };
+            child.castShadow = true;
+            child.receiveShadow = true;
+            clickableBuildings.push(child); // 加入可点击数组
+        }
+    })
+    scene.add(model)
+    document.querySelector('.loading').style.display = 'none'; // 隐藏加载提示
+})
+
+// ========== 核心：鼠标点击事件处理（对齐建筑2.html交互逻辑） ==========
+function onMouseClick(event) {
+    // 计算鼠标归一化设备坐标（适配容器而非整个窗口）
+    mouse.x = (event.clientX / box.clientWidth) * 2 - 1;
+    mouse.y = -(event.clientY / box.clientHeight) * 2 + 1;
+
+    // 更新射线检测器
+    raycaster.setFromCamera(mouse, camera);
+
+    // 检测射线与可点击建筑的交集
+    const intersects = raycaster.intersectObjects(clickableBuildings);
+
+    if (intersects.length > 0) {
+        const clickedBuilding = intersects[0].object;
+        
+        // 重复点击同一建筑则重置视角
+        if (selectedBuilding === clickedBuilding) {
+            resetView();
+            return;
+        }
+
+        selectedBuilding = clickedBuilding;
+
+        // 显示建筑信息面板
+        document.getElementById('building-name').textContent = clickedBuilding.userData.name;
+        document.getElementById('building-description').textContent = clickedBuilding.userData.description;
+        document.getElementById('info-panel').style.display = 'block';
+
+        // 优化：通过包围盒计算建筑真实中心（适配不同大小/位置的建筑）
+        const boundingBox = new THREE.Box3().setFromObject(clickedBuilding);
+        const buildingCenter = new THREE.Vector3();
+        boundingBox.getCenter(buildingCenter);
+        
+        // 计算建筑最大维度（适配不同大小建筑的视角距离）
+        const boxSize = new THREE.Vector3();
+        boundingBox.getSize(boxSize);
+        const maxDim = Math.max(boxSize.x, boxSize.y, boxSize.z);
+
+        // 计算相机目标位置（建筑中心上方+前方，基于建筑大小动态调整）
+        const targetCameraPos = buildingCenter.clone();
+        targetCameraPos.y += maxDim * 1.5; // 上方偏移：建筑高度的1.5倍
+        targetCameraPos.z += maxDim * 2;   // 前方偏移：建筑最大维度的2倍
+
+        // 平滑移动相机（对齐建筑2.html的动画曲线）
+        new TWEEN.Tween(camera.position)
+            .to({ x: targetCameraPos.x, y: targetCameraPos.y, z: targetCameraPos.z }, 1500)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .start();
+
+        // 平滑移动控制器目标（聚焦建筑中心）
+        new TWEEN.Tween(controls.target)
+            .to({ x: buildingCenter.x, y: buildingCenter.y, z: buildingCenter.z }, 1500)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .onUpdate(() => controls.update())
+            .start();
+    } else {
+        // 点击空白处重置视角
+        resetView();
+    }
+}
+
+// ========== 重置视角函数（保留逻辑，对齐初始状态） ==========
+function resetView() {
+    // 恢复初始相机位置
+    new TWEEN.Tween(camera.position)
+        .to({ x: initialCameraPos.x, y: initialCameraPos.y, z: initialCameraPos.z }, 1500)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .start();
+
+    // 恢复初始控制器目标
+    new TWEEN.Tween(controls.target)
+        .to({ x: initialControlsTarget.x, y: initialControlsTarget.y, z: initialControlsTarget.z }, 1500)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .onUpdate(() => controls.update())
+        .start();
+
+    // 隐藏信息面板
+    document.getElementById('info-panel').style.display = 'none';
+    selectedBuilding = null;
+}
+
+// ========== 绑定事件 ==========
+renderer.domElement.addEventListener('click', onMouseClick);
+document.getElementById('reset-view').addEventListener('click', resetView);
+
+// ========== 动画循环（新增TWEEN更新） ==========
+function animate() {
+    requestAnimationFrame(animate)
+    TWEEN.update(); // 必须：更新Tween动画
+    controls.update(); // 更新控制器（阻尼生效）
+    renderer.render(scene, camera)
+}
+animate()
+
+// ========== 窗口resize（新增LineMaterial分辨率更新） ==========
+window.onresize = () => {
+    renderer.setSize(box.clientWidth, box.clientHeight)
+    camera.aspect = box.clientWidth / box.clientHeight
+    camera.updateProjectionMatrix()
+
+    // 修复缩放后描边线条变形问题
+    scene.traverse((child) => {
+        if (child.isLineSegments2) {
+            child.material.resolution.set(box.clientWidth, box.clientHeight);
+        }
+    });
+}
+
+/**
+ * 名称: 建筑线条
+ * 作者: 优雅永不过时 https://z2586300277.github.io/
+ */
+</script>
+</body>
+</html>
