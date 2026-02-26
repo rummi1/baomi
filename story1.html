@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Story</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+
+        /* 视频容器 */
+        #video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            background: #000;
+            transition: opacity 0.8s ease;
+        }
+
+        #video-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #main-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 视频控制栏 */
+        .video-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1002;
+            pointer-events: none;
+        }
+
+        .video-controls > * {
+            pointer-events: all;
+        }
+
+        /* 音量控制 */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .volume-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .volume-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .volume-slider {
+            width: 100px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .volume-percent {
+            color: white;
+            font-size: 14px;
+            min-width: 40px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        /* 跳过按钮 */
+        .skip-btn {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            border-radius: 40px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .skip-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-2px);
+        }
+
+        /* 主场景容器 */
+        #scene-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('stroy1-bg.png');
+            background-size: cover;
+            background-position: center;
+            transition: filter 0.8s ease;
+            z-index: 1;
+        }
+
+        #scene-container.blurred {
+            filter: blur(8px) brightness(0.9);
+        }
+
+        /* 可点击热点 */
+        .hotspot {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+            cursor: pointer;
+            animation: pulse 2s infinite;
+            display: none;
+            box-shadow: 0 0 20px rgba(255,255,255,0.6);
+            z-index: 10;
+        }
+
+        .hotspot::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        #scene-container.explore-mode .hotspot {
+            display: block;
+        }
+
+        /* 热点位置 */
+        .hotspot-1 { top: 230px; left: 700px; }
+
+        /* 查看字幕按钮 */
+        .subtitles-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 18px;
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .subtitles-btn.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .subtitles-btn:hover {
+            background: #ffffff;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        /* 字幕弹窗 */
+        .subtitles-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .subtitles-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .subtitles-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 70vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .subtitles-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .subtitle-item {
+            color: #555;
+            margin-bottom: 12px;
+            line-height: 1.6;
+            padding: 10px 14px;
+            background: #f8f8f8;
+            border-radius: 6px;
+            border-left: 3px solid #ddd;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            color: #666;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        /* 对话系统 */
+        #dialogue-system {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.5s ease;
+        }
+
+        #dialogue-system.active {
+            transform: translateY(0);
+        }
+
+        .dialogue-box {
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            padding: 0;
+            min-height: 300px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+
+        .dialogue-content {
+            max-width: 100%;
+            margin: 0;
+            display: block;
+            position: relative;
+            padding: 30px 40px 40px 40px;
+        }
+
+        .dialogue-text-area {
+            width: 100%;
+        }
+
+        .speaker-label {
+            display: inline-block;
+            background: #1a1a1a;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 24px;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .dialogue-text {
+            color: #333;
+            font-size: 24px;
+            line-height: 1.8;
+            min-height: 60px;
+            padding-right: 120px;
+        }
+
+        /* 打字机效果光标 */
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 18px;
+            background: #333;
+            margin-left: 3px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* 下一页按钮 */
+        .next-btn {
+            position: absolute;
+            bottom: -100px;
+            right: 40px;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .next-btn:hover {
+            background: #333;
+            transform: translateX(3px);
+        }
+
+        .next-btn:active {
+            transform: translateX(1px);
+        }
+
+        /* 探索模式提示 */
+        .explore-hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 50;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
+            padding: 20px 30px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .explore-hint.visible {
+            opacity: 1;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .video-controls {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 10px;
+                padding: 0 20px;
+            }
+
+            .subtitles-btn {
+                top: 10px;
+                right: 10px;
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+            
+            .dialogue-content {
+                padding: 20px;
+            }
+            
+            .dialogue-text {
+                padding-right: 0;
+                padding-bottom: 60px;
+            }
+            
+            .next-btn {
+                position: relative;
+                bottom: auto;
+                right: auto;
+                margin-top: 20px;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 视频容器 -->
+    <div id="video-container">
+        <video id="main-video" autoplay playsinline>
+            <source src="开头.mp4" type="video/mp4">
+            您的浏览器不支持视频播放。
+        </video>
+
+        <!-- 视频控制栏 -->
+        <div class="video-controls">
+            <!-- 音量控制 - 默认显示 -->
+            <div class="volume-control" id="volumeControl">
+                <button class="volume-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.7" oninput="changeVolume(this.value)">
+                <span class="volume-percent" id="volumePercent">70%</span>
+            </div>
+            
+            <!-- 跳过按钮 -->
+            <button class="skip-btn" onclick="skipVideo()">
+                跳过
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                    <line x1="19" y1="5" x2="19" y2="19"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 主场景 -->
+    <div id="scene-container" class="blurred">
+        <div class="hotspot hotspot-1" onclick="goToNextPage()" title="进入下一个场景"></div>
+    </div>
+
+    <!-- 查看字幕按钮 -->
+    <button class="subtitles-btn" id="subtitlesBtn" onclick="showSubtitles()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;">
+            <path d="M4 7h16M4 12h16M4 17h12"></path>
+        </svg>
+        查看视频内容
+    </button>
+
+    <!-- 字幕弹窗 -->
+    <div class="subtitles-modal" id="subtitlesModal">
+        <div class="subtitles-content">
+            <button class="close-modal" onclick="closeSubtitles()">×</button>
+            <h2>视频字幕内容</h2>
+            <div id="subtitlesList"></div>
+        </div>
+    </div>
+
+    <!-- 探索提示 -->
+    <div class="explore-hint" id="exploreHint">
+        <p>点击场景中的光点继续探索</p>
+    </div>
+
+    <!-- 对话系统 -->
+    <div id="dialogue-system">
+        <div class="dialogue-box">
+            <div class="dialogue-content">
+                <div class="dialogue-text-area">
+                    <div class="speaker-label" id="speakerLabel">OS:</div>
+                    <div class="dialogue-text" id="dialogueText">
+                        <span id="textContent"></span><span class="typing-cursor" id="cursor"></span>
+                    </div>
+                </div>
+                <button class="next-btn" id="nextBtn" onclick="nextDialogue()">
+                    下一页
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 对话数据
+        const dialogues = [
+            {
+                speaker: "苞米:",
+                text: "这是第一段对话内容，背景已经模糊，只有对话框是清楚的~"
+            },
+            {
+                speaker: "系统:",
+                text: "视频播放已经完成，现在进入了交互式对话阶段。您可以点击右下角的按钮继续。"
+            },
+            {
+                speaker: "向导:",
+                text: "在这个场景中，您需要仔细观察周围的环境。背景虽然模糊，但隐藏着重要的线索。"
+            },
+            {
+                speaker: "OS:",
+                text: "对话即将结束，之后背景会恢复清晰，您可以点击场景中的特定位置进入下一个页面。"
+            },
+            {
+                speaker: "提示:",
+                text: "现在背景已经清晰，请点击场景中的发光点进入下一个页面。"
+            }
+        ];
+
+        // 视频字幕数据
+        const videoSubtitles = [
+            { 
+                time: "早间新闻", 
+                text: "各位听众早上好，这里是南山市新闻广播早间新闻，现在为您插播一条突发警情通报。" 
+            },
+            { 
+                time: "突发警情", 
+                text: "2025年11月11日清晨，南山市氹环区海湾金融城“提希丰”高端养生会所内，保洁人员在贵宾包间内发现一具女性尸体。经警方初步核实，死者为林静怡，40岁，深南市千禧会计事务所高级会计师。" 
+            },
+            { 
+                time: "警方通报", 
+                text: "目前，南山市氹环区天路分局已正式介入该案调查，展开全面排查。" 
+            },
+            { 
+                time: "警方呼吁", 
+                text: "警方呼吁，广大市民若在11月10日晚间至11月11日清晨，在南山市氹环区海湾金融城周边看到过林静怡，或有相关可疑人员、可疑行为线索，及时拨打110报警电话，向警方提供有效信息，协助案件侦破。" 
+            },
+            { 
+                time: "后续报道", 
+                text: "本台将持续跟踪该案进展，第一时间为您播报最新调查结果。接下来，为您播报其他早间新闻..." 
+            }
+        ];
+
+        let currentDialogueIndex = 0;
+        let isTyping = false;
+        let typingTimeout;
+        let isExploreMode = false;
+
+        const video = document.getElementById('main-video');
+        const videoContainer = document.getElementById('video-container');
+        const sceneContainer = document.getElementById('scene-container');
+        const dialogueSystem = document.getElementById('dialogue-system');
+        const subtitlesBtn = document.getElementById('subtitlesBtn');
+        const speakerLabel = document.getElementById('speakerLabel');
+        const textContent = document.getElementById('textContent');
+        const cursor = document.getElementById('cursor');
+        const nextBtn = document.getElementById('nextBtn');
+        const exploreHint = document.getElementById('exploreHint');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumePercent = document.getElementById('volumePercent');
+
+        // 初始化视频
+        function initVideo() {
+            // 设置初始音量为70%
+            video.volume = 0.7;
+            video.muted = false;
+            
+            // 尝试自动播放
+            video.play().catch(e => {
+                console.log('自动播放失败，尝试静音播放:', e);
+                // 如果自动播放失败，尝试静音播放
+                video.muted = true;
+                video.play().catch(err => {
+                    console.log('静音播放也失败:', err);
+                });
+            });
+        }
+
+        // 页面加载后初始化视频
+        window.addEventListener('load', initVideo);
+
+        // 用户首次点击页面时，如果视频是静音的，取消静音
+        document.addEventListener('click', function enableAudio() {
+            if (video.muted) {
+                video.muted = false;
+                updateMuteButton();
+            }
+            document.removeEventListener('click', enableAudio);
+        }, { once: true });
+
+        // 视频结束事件
+        video.addEventListener('ended', startDialogue);
+        video.addEventListener('error', () => setTimeout(startDialogue, 1000));
+
+        // 切换静音
+        function toggleMute() {
+            video.muted = !video.muted;
+            updateMuteButton();
+        }
+
+        // 更新静音按钮状态
+        function updateMuteButton() {
+            if (video.muted) {
+                muteBtn.textContent = '🔇';
+            } else {
+                if (video.volume >= 0.5) {
+                    muteBtn.textContent = '🔊';
+                } else if (video.volume > 0) {
+                    muteBtn.textContent = '🔉';
+                } else {
+                    muteBtn.textContent = '🔈';
+                }
+            }
+        }
+
+        // 改变音量
+        function changeVolume(value) {
+            video.volume = parseFloat(value);
+            video.muted = false;
+            
+            // 更新百分比显示
+            const percent = Math.round(video.volume * 100);
+            volumePercent.textContent = percent + '%';
+            
+            // 更新按钮图标
+            updateMuteButton();
+        }
+
+        function skipVideo() {
+            video.pause();
+            videoContainer.classList.add('hidden');
+            setTimeout(() => {
+                videoContainer.style.display = 'none';
+                startDialogue();
+            }, 800);
+        }
+
+        function startDialogue() {
+            videoContainer.classList.add('hidden');
+            setTimeout(() => videoContainer.style.display = 'none', 800);
+            
+            dialogueSystem.classList.add('active');
+            subtitlesBtn.classList.add('visible');
+            showDialogue(0);
+        }
+
+        function showDialogue(index) {
+            if (index >= dialogues.length) return;
+
+            currentDialogueIndex = index;
+            const dialogue = dialogues[index];
+            speakerLabel.textContent = dialogue.speaker;
+            // 直接显示完整文本，不再逐字添加
+            textContent.textContent = dialogue.text;
+            cursor.style.display = 'none'; // 隐藏打字机光标（可选）
+            
+            isTyping = false; // 标记为非打字状态
+            // 直接启用下一页按钮，无需等待打字完成
+            nextBtn.style.opacity = '1';
+            nextBtn.style.pointerEvents = 'all';
+            
+            // 最后一段对话的按钮文字修改逻辑保留
+            if (index === dialogues.length - 1) {
+                nextBtn.innerHTML = '开始探索 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+            }
+        }
+        
+        function nextDialogue() {
+            if (currentDialogueIndex === dialogues.length - 1) {
+                enterExploreMode();
+               return;
+            }
+
+            showDialogue(currentDialogueIndex + 1);
+        }
+
+        function enterExploreMode() {
+            isExploreMode = true;
+            subtitlesBtn.classList.remove('visible');
+            sceneContainer.classList.remove('blurred');
+            sceneContainer.classList.add('explore-mode');
+            exploreHint.classList.add('visible');
+            
+            textContent.textContent = "现在背景已经清晰，请点击场景中的发光点进入下一个页面。";
+            speakerLabel.textContent = "提示:";
+            
+            setTimeout(() => exploreHint.classList.remove('visible'), 3000);
+        }
+
+        function showSubtitles() {
+            const list = document.getElementById('subtitlesList');
+            list.innerHTML = videoSubtitles.map(sub => `
+                <div class="subtitle-item">
+                    <strong style="color: #888; margin-right: 10px;">${sub.time}</strong>
+                    ${sub.text}
+                </div>
+            `).join('');
+            
+            document.getElementById('subtitlesModal').classList.add('active');
+        }
+
+        function closeSubtitles() {
+            document.getElementById('subtitlesModal').classList.remove('active');
+        }
+
+        document.getElementById('subtitlesModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeSubtitles();
+        });
+
+        function goToNextPage() {
+            document.body.style.transition = 'opacity 0.5s ease';
+            document.body.style.opacity = '0';
+            setTimeout(() => window.location.href = 'website1.html', 500);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'Enter' || e.key === ' ') && dialogueSystem.classList.contains('active')) {
+                nextDialogue();
+            }
+            if (e.key === 'Escape') closeSubtitles();
+        });
+    </script>
+</body>
+</html>
