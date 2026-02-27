@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Outlook 邮箱 · 毕敏工作邮箱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        outlook: {
+                            blue: '#0078d4',
+                            'blue-dark': '#106ebe',
+                            'blue-light': '#2b88d8',
+                            'blue-hover': '#005a9e',
+                        },
+                        primary: '#0078d4',
+                        dark: '#111111',
+                        light: '#f1efe8',
+                        'light-secondary': '#e5e2d9',
+                        'witness': '#dc3545',
+                        'witness-light': '#f8d7da',
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', '"SF Pro Text"', '"Source Han Sans"', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer base {
+            * {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            body {
+                background-color: #f1efe8;
+            }
+        }
+        
+        @layer utilities {
+            .geometric-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 0;
+            }
+            
+            .geo-line {
+                position: absolute;
+                background: rgba(17, 17, 17, 0.03);
+            }
+            
+            .geo-line.horizontal {
+                width: 100%;
+                height: 1px;
+            }
+            
+            .geo-line.vertical {
+                width: 1px;
+                height: 100%;
+            }
+            
+            .geo-circle {
+                position: absolute;
+                border: 1px solid rgba(17, 17, 17, 0.03);
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+            }
+            
+            .geo-square {
+                position: absolute;
+                border: 1px solid rgba(17, 17, 17, 0.03);
+                width: 16px;
+                height: 16px;
+            }
+            
+            .accent-bar-left {
+                position: relative;
+            }
+            
+            .accent-bar-left::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 4px;
+                height: 100%;
+                background-color: #0078d4;
+            }
+            
+            .outlook-card {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.1);
+            }
+            
+            .outlook-input {
+                transition: all 0.2s ease;
+                border: 1px solid #8a8886;
+            }
+            
+            .outlook-input:hover {
+                border-color: #111111;
+            }
+            
+            .outlook-input:focus {
+                outline: none;
+                border-color: #0078d4;
+                box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+            }
+            
+            .outlook-btn-primary {
+                background-color: #0078d4;
+                color: white;
+                transition: all 0.2s ease;
+            }
+            
+            .outlook-btn-primary:hover {
+                background-color: #106ebe;
+            }
+            
+            .outlook-btn-primary:active {
+                background-color: #005a9e;
+            }
+            
+            .view-section {
+                display: none !important;
+                width: 100%;
+                height: 100%;
+                flex-shrink: 0;
+            }
+            
+            .view-section.active {
+                display: flex !important;
+                flex-direction: column;
+            }
+            
+            .view-section.drive-view.active,
+            .view-section.contacts-view.active {
+                display: block !important;
+            }
+            
+            .evidence-tag {
+                display: inline-block;
+                background: #e7f1ff;
+                color: #0f6cbd;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-size: 11px;
+                margin-right: 4px;
+                font-weight: 600;
+                vertical-align: middle;
+            }
+            
+            .game-hint {
+                background: #fff3cd;
+                border-left: 3px solid #ffc107;
+                padding: 8px 12px;
+                margin: 8px 0;
+                border-radius: 0 6px 6px 0;
+                font-size: 12px;
+                color: #856404;
+                line-height: 1.4;
+            }
+            
+            .guide-section {
+                background: #f8f9fa;
+                border: 1px solid #e9ecef;
+                border-radius: 6px;
+                padding: 10px;
+                margin: 8px 0;
+            }
+            
+            .guide-section h4 {
+                margin: 0 0 6px 0;
+                color: #495057;
+                font-size: 13px;
+                font-weight: 600;
+            }
+            
+            .guide-section ul {
+                margin: 0;
+                padding-left: 16px;
+                font-size: 12px;
+                color: #6c757d;
+            }
+            
+            .guide-section li {
+                margin: 2px 0;
+            }
+            
+            .drive-item {
+                position: relative;
+                transition: all 0.2s ease;
+            }
+            
+            .locked-file {
+                opacity: 0.5;
+                background: #f8f9fa !important;
+            }
+            
+            .locked-file::after {
+                content: "🔒 需申请解锁";
+                position: absolute;
+                right: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: #6c757d;
+                color: white;
+                padding: 2px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 500;
+            }
+            
+            .unlocked-file {
+                border-left: 3px solid #28a745 !important;
+                background: #f8fff8 !important;
+            }
+            
+            .unlocked-file::after {
+                content: "✓ 已获取";
+                position: absolute;
+                right: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: #28a745;
+                color: white;
+                padding: 2px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 500;
+            }
+            
+            .guide-mail {
+                background: #fff8e1 !important;
+                border-left: 3px solid #ffc107 !important;
+            }
+            
+            .guide-mail .item-subject {
+                color: #f57c00 !important;
+                font-weight: 600;
+            }
+            
+            .drive-empty {
+                text-align: center;
+                padding: 60px 20px;
+                color: #6c757d;
+            }
+            
+            .drive-empty-icon {
+                font-size: 48px;
+                margin-bottom: 16px;
+                opacity: 0.3;
+            }
+            
+            .mail-item {
+                border-bottom: 1px solid #e5e2d9;
+                transition: all 0.2s ease;
+            }
+            
+            .mail-item:hover {
+                background-color: #e5e2d9;
+            }
+            
+            .mail-item.unread {
+                background-color: #fff;
+                border-left: 3px solid #0078d4;
+            }
+            
+            .mail-item.unread .item-subject {
+                font-weight: 600;
+                color: #0078d4;
+            }
+            
+            .rail-item {
+                transition: all 0.2s ease;
+            }
+            
+            .rail-item:hover {
+                background-color: rgba(0, 120, 212, 0.1);
+            }
+            
+            .rail-item.active {
+                background-color: rgba(0, 120, 212, 0.15);
+                border-left: 3px solid #0078d4;
+            }
+            
+            .folder-item {
+                transition: all 0.2s ease;
+            }
+            
+            .folder-item:hover {
+                background-color: #e5e2d9;
+            }
+            
+            .folder-item.active {
+                background-color: #0078d4;
+                color: white;
+            }
+            
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 100;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .modal.open {
+                display: flex;
+            }
+            
+            .modal__content {
+                background: white;
+                border: 1px solid #111111;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                max-width: 600px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                position: relative;
+            }
+            
+            .modal__header {
+                padding: 16px;
+                border-bottom: 1px solid #e5e2d9;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: #f1efe8;
+            }
+            
+            .modal__body {
+                padding: 20px;
+            }
+            
+            .toast {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #111111;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 4px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                z-index: 200;
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.3s ease;
+            }
+            
+            .toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            /* 联系人分类样式 */
+            .contact-category {
+                margin-bottom: 24px;
+            }
+            
+            .contact-category-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+                border-bottom: 2px solid #e5e2d9;
+            }
+            
+            .contact-category-title {
+                font-size: 16px;
+                font-weight: 700;
+                color: #111111;
+                margin-right: 8px;
+            }
+            
+            .contact-category-badge {
+                background: #0078d4;
+                color: white;
+                font-size: 11px;
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-weight: 600;
+            }
+            
+            .contact-category-badge.gov {
+                background: #0078d4;
+            }
+            
+            .contact-category-badge.friend {
+                background: #28a745;
+            }
+            
+            .contact-category-badge.witness {
+                background: #dc3545;
+            }
+            
+            .contact-card {
+                background: white;
+                border: 1px solid #111111;
+                border-radius: 4px;
+                padding: 16px;
+                margin-bottom: 12px;
+                transition: all 0.2s ease;
+                position: relative;
+            }
+            
+            .contact-card:hover {
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                transform: translateY(-2px);
+            }
+            
+            .contact-card.locked {
+                opacity: 0.6;
+                background: #f8f9fa;
+            }
+            
+            .contact-card.witness {
+                border-left: 4px solid #dc3545;
+            }
+            
+            .contact-card.witness::before {
+                content: "关键证人";
+                position: absolute;
+                top: -1px;
+                right: -1px;
+                background: #dc3545;
+                color: white;
+                font-size: 10px;
+                padding: 2px 8px;
+                border-radius: 0 0 0 4px;
+                font-weight: 600;
+            }
+            
+            .contact-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 8px;
+            }
+            
+            .contact-name-section {
+                flex: 1;
+            }
+            
+            .contact-name {
+                font-size: 15px;
+                font-weight: 700;
+                color: #111111;
+                margin-bottom: 2px;
+            }
+            
+            .contact-title {
+                font-size: 12px;
+                color: #0078d4;
+                font-weight: 600;
+            }
+            
+            .contact-mail {
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 8px;
+                font-family: monospace;
+            }
+            
+            .contact-note {
+                background: #f8f9fa;
+                border-left: 3px solid #ffc107;
+                padding: 8px 12px;
+                margin: 8px 0;
+                font-size: 12px;
+                color: #555;
+                line-height: 1.4;
+                border-radius: 0 4px 4px 0;
+            }
+            
+            .contact-note::before {
+                content: "· ";
+                font-weight: bold;
+            }
+            
+            .contact-description {
+                font-size: 13px;
+                color: #333;
+                margin-bottom: 12px;
+                line-height: 1.4;
+            }
+            
+            .contact-actions {
+                display: flex;
+                justify-content: flex-end;
+            }
+            
+            .contact-btn {
+                padding: 6px 16px;
+                border-radius: 4px;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                border: none;
+            }
+            
+            .contact-btn.primary {
+                background: #0078d4;
+                color: white;
+            }
+            
+            .contact-btn.primary:hover {
+                background: #106ebe;
+            }
+            
+            .contact-btn.locked {
+                background: #6c757d;
+                color: white;
+                cursor: not-allowed;
+            }
+            
+            .contact-btn.witness-btn {
+                background: #dc3545;
+                color: white;
+            }
+            
+            .contact-btn.witness-btn:hover {
+                background: #c82333;
+            }
+            
+            .unlock-hint {
+                font-size: 11px;
+                color: #dc3545;
+                margin-top: 6px;
+                font-style: italic;
+            }
+
+            /* 攻略内容展示样式 */
+            .guide-content-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 16px 20px;
+                margin: -24px -24px 20px -24px;
+                border-radius: 0;
+            }
+            
+            .guide-content-header.mark {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+            
+            .guide-content-header h3 {
+                font-size: 16px;
+                font-weight: 700;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .guide-level-badge {
+                background: rgba(255,255,255,0.3);
+                padding: 2px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 600;
+            }
+            
+            .guide-content-body {
+                background: #f8f9fa;
+                border-left: 4px solid #667eea;
+                padding: 16px;
+                border-radius: 0 8px 8px 0;
+                margin: 16px 0;
+            }
+            
+            .guide-content-body.mark {
+                border-left-color: #f5576c;
+            }
+            
+            .guide-content-body h4 {
+                color: #667eea;
+                font-size: 14px;
+                font-weight: 700;
+                margin: 0 0 12px 0;
+            }
+            
+            .guide-content-body.mark h4 {
+                color: #f5576c;
+            }
+            
+            .guide-content-body ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+            
+            .guide-content-body li {
+                margin: 8px 0;
+                line-height: 1.6;
+                color: #333;
+            }
+            
+            .guide-content-body strong {
+                color: #0078d4;
+            }
+            
+            .guide-tip-box {
+                background: #e7f1ff;
+                border: 1px solid #0078d4;
+                border-radius: 6px;
+                padding: 12px;
+                margin: 16px 0;
+                font-size: 12px;
+                color: #004578;
+            }
+            
+            .guide-warning-box {
+                background: #fff3cd;
+                border: 1px solid #ffc107;
+                border-radius: 6px;
+                padding: 12px;
+                margin: 16px 0;
+                font-size: 12px;
+                color: #856404;
+            }
+            
+            .guide-action-hint {
+                text-align: center;
+                color: #666;
+                font-size: 12px;
+                margin-top: 20px;
+                padding-top: 16px;
+                border-top: 1px dashed #ddd;
+            }
+
+            /* 按钮激活状态 */
+            .btn-active-forward {
+                background-color: #667eea !important;
+                color: white !important;
+                border-color: #667eea !important;
+            }
+            
+            .btn-active-mark {
+                background-color: #f5576c !important;
+                color: white !important;
+                border-color: #f5576c !important;
+            }
+
+            /* 选择题样式 */
+            .quiz-container {
+                background: #f8f9fa;
+                border: 2px solid #0078d4;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 16px 0;
+            }
+            
+            .quiz-title {
+                font-size: 16px;
+                font-weight: 700;
+                color: #0078d4;
+                margin-bottom: 16px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .quiz-question {
+                margin-bottom: 16px;
+                padding: 12px;
+                background: white;
+                border-radius: 6px;
+                border: 1px solid #e5e2d9;
+            }
+            
+            .quiz-question label {
+                display: block;
+                font-size: 13px;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 8px;
+            }
+            
+            .quiz-select {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #8a8886;
+                border-radius: 4px;
+                font-size: 13px;
+                background: white;
+                cursor: pointer;
+            }
+            
+            .quiz-select:focus {
+                outline: none;
+                border-color: #0078d4;
+                box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+            }
+            
+            .quiz-submit {
+                width: 100%;
+                padding: 12px;
+                background: #0078d4;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin-top: 12px;
+            }
+            
+            .quiz-submit:hover {
+                background: #106ebe;
+            }
+            
+            .quiz-result {
+                margin-top: 16px;
+                padding: 12px;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                text-align: center;
+                display: none;
+            }
+            
+            .quiz-result.success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+                display: block;
+            }
+            
+            .quiz-result.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+                display: block;
+            }
+
+            /* 口令选择样式 */
+            .password-select-container {
+                background: #e7f1ff;
+                border: 2px solid #0078d4;
+                border-radius: 8px;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+            
+            .password-select-container label {
+                display: block;
+                font-size: 14px;
+                font-weight: 600;
+                color: #0078d4;
+                margin-bottom: 8px;
+            }
+            
+            .password-select {
+                width: 100%;
+                padding: 10px 12px;
+                border: 2px solid #0078d4;
+                border-radius: 6px;
+                font-size: 14px;
+                background: white;
+                cursor: pointer;
+                font-weight: 500;
+            }
+            
+            .password-select:focus {
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.2);
+            }
+            
+            .password-hint {
+                font-size: 12px;
+                color: #666;
+                margin-top: 8px;
+                font-style: italic;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#f1efe8] min-h-screen font-sans text-[#111111] overflow-x-hidden relative">
+
+    <!-- 几何装饰背景 - 米纸色基调 -->
+    <div class="geometric-container">
+        <div class="geo-line horizontal" style="top: 12%;"></div>
+        <div class="geo-line horizontal" style="top: 35%;"></div>
+        <div class="geo-line horizontal" style="top: 62%;"></div>
+        <div class="geo-line horizontal" style="top: 88%;"></div>
+        <div class="geo-line vertical" style="left: 8%;"></div>
+        <div class="geo-line vertical" style="left: 25%;"></div>
+        <div class="geo-line vertical" style="left: 75%;"></div>
+        <div class="geo-line vertical" style="left: 92%;"></div>
+        <div class="geo-circle" style="top: 6%; left: 12%;"></div>
+        <div class="geo-circle" style="top: 28%; left: 88%;"></div>
+        <div class="geo-circle" style="top: 55%; left: 18%;"></div>
+        <div class="geo-circle" style="top: 82%; left: 82%;"></div>
+        <div class="geo-square" style="top: 15%; left: 45%;"></div>
+        <div class="geo-square" style="top: 42%; left: 62%;"></div>
+        <div class="geo-square" style="top: 68%; left: 35%;"></div>
+        <div class="geo-square" style="top: 90%; left: 55%;"></div>
+    </div>
+
+    <!-- 顶部状态栏 - 黑色边框白色背景 -->
+    <div class="bg-white border-b border-[#111111] px-4 py-2 flex items-center justify-between relative z-10">
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 rounded-full bg-[#0078d4] animate-pulse"></div>
+                <span class="text-sm text-[#111111]">连接正常</span>
+            </div>
+            <span class="text-sm text-gray-500">|</span>
+        </div>
+        <div class="flex items-center space-x-4 text-sm">
+            <span id="current-time" class="font-medium text-[#111111]"></span>
+            <span class="text-gray-500">© 2026 工作邮箱系统 v2.1</span>
+        </div>
+    </div>
+
+    <div class="flex min-h-[calc(100vh-40px)] relative z-10">
+        <!-- 左侧导航栏 -->
+        <nav class="w-16 bg-white border-r border-[#111111] flex flex-col items-center py-4 space-y-4" aria-label="主导航">
+            <div class="w-10 h-10 rounded bg-[#0078d4] flex items-center justify-center text-white text-xl font-bold mb-2">
+                O
+            </div>
+            <a class="rail-item active w-full py-3 flex flex-col items-center text-[#111111]" href="#" data-target="mail" aria-current="page">
+                <svg class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M3 6.75A2.75 2.75 0 0 1 5.75 4h12.5A2.75 2.75 0 0 1 21 6.75v10.5A2.75 2.75 0 0 1 18.25 20H5.75A2.75 2.75 0 0 1 3 17.25Zm2-.75a.75.75 0 0 0-.75.75V8l7.42 4.64a1.75 1.75 0 0 0 1.86 0L21.75 8V6.75a.75.75 0 0 0-.75-.75Z"></path>
+                </svg>
+                <span class="text-xs">邮件</span>
+            </a>
+            <a class="rail-item w-full py-3 flex flex-col items-center text-[#111111]" href="#" data-target="drive">
+                <svg class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M4 7.75A2.75 2.75 0 0 1 6.75 5h10.5A2.75 2.75 0 0 1 20 7.75v8.5A2.75 2.75 0 0 1 17.25 19H6.75A2.75 2.75 0 0 1 4 16.25Zm2.75-.75a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h10.5a.75.75 0 0 0 .75-.75V7.75a.75.75 0 0 0-.75-.75ZM7.5 8.5h9v1.5h-9Zm0 3h5v1.5h-5Z"></path>
+                </svg>
+                <span class="text-xs">云盘</span>
+            </a>
+            <a class="rail-item w-full py-3 flex flex-col items-center text-[#111111]" href="#" data-target="contacts">
+                <svg class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2a4.25 4.25 0 1 1 0 8.5 4.25 4.25 0 0 1 0-8.5Zm0 10c3.33 0 6.62 1.46 7.88 3.94a1.75 1.75 0 0 1-1.56 2.56H5.68a1.75 1.75 0 0 1-1.56-2.56C5.38 13.46 8.67 12 12 12Z"></path>
+                </svg>
+                <span class="text-xs">联系人</span>
+            </a>
+            <a class="rail-item w-full py-3 flex flex-col items-center text-[#111111]" href="#">
+                <svg class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M5.25 4h13.5A1.75 1.75 0 0 1 20.5 5.75v12.5A1.75 1.75 0 0 1 18.75 20H5.25A1.75 1.75 0 0 1 3.5 18.25V5.75A1.75 1.75 0 0 1 5.25 4ZM12 5.5 5 18.5h14Z"></path>
+                </svg>
+                <span class="text-xs">日历</span>
+            </a>
+        </nav>
+
+        <div class="flex-1 flex flex-col min-w-0 bg-[#f1efe8]" id="app">
+            <!-- 邮件视图 -->
+            <section class="view-section mail-view active" data-view="mail">
+                <!-- 命令栏 -->
+                <header class="bg-white border-b border-[#111111] px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <span class="bg-[#0078d4] text-white px-3 py-1 rounded text-sm font-medium">Outlook</span>
+                        <nav class="flex space-x-2" aria-label="应用切换">
+                            <button class="px-3 py-1.5 text-sm font-medium text-white bg-[#0078d4] rounded transition-colors">主页</button>
+                            <button class="px-3 py-1.5 text-sm font-medium text-[#111111] hover:bg-[#e5e2d9] rounded transition-colors">日历</button>
+                            <button class="px-3 py-1.5 text-sm font-medium text-[#111111] hover:bg-[#e5e2d9] rounded transition-colors">待办</button>
+                            <button class="px-3 py-1.5 text-sm font-medium text-[#111111] hover:bg-[#e5e2d9] rounded transition-colors">帮助</button>
+                        </nav>
+                    </div>
+
+                    <div class="flex items-center bg-[#f1efe8] border border-[#8a8886] rounded px-3 py-1.5 w-64">
+                        <svg class="w-4 h-4 text-gray-500 mr-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M10.5 3a7.5 7.5 0 0 1 5.996 12.003l3.25 3.25-1.06 1.06-3.25-3.25A7.5 7.5 0 1 1 10.5 3Zm0 1.5a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z"></path>
+                        </svg>
+                        <input type="search" placeholder="搜索" class="bg-transparent border-none outline-none text-sm w-full" />
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors" title="设置" aria-label="设置">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 7.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0-3a1.5 1.5 0 0 1 1.47 1.18l.14.55a1.5 1.5 0 0 0 1.61 1.11l.56-.06a1.5 1.5 0 0 1 1.54.87l.24.51a1.5 1.5 0 0 1-.32 1.71l-.4.4a1.5 1.5 0 0 0 0 2.12l.4.4a1.5 1.5 0 0 1 .32 1.71l-.24.51a1.5 1.5 0 0 1-1.54.87l-.56-.06a1.5 1.5 0 0 0-1.61 1.11l-.14.55A1.5 1.5 0 0 1 12 19.5h-.5a1.5 1.5 0 0 1-1.47-1.18l-.14-.55a1.5 1.5 0 0 0-1.61-1.11l-.56.06a1.5 1.5 0 0 1-1.54-.87l-.24-.51a1.5 1.5 0 0 1 .32-1.71l.4-.4a1.5 1.5 0 0 0 0-2.12l-.4-.4a1.5 1.5 0 0 1-.32-1.71l.24-.51a1.5 1.5 0 0 1 1.54-.87l.56.06a1.5 1.5 0 0 0 1.61-1.11l.14-.55A1.5 1.5 0 0 1 11.5 4.5Z"></path>
+                            </svg>
+                        </button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors" title="通知" aria-label="通知">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M10.5 3a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm0 10c3.33 0 6.62 1.46 7.88 3.94a1.75 1.75 0 0 1-1.56 2.56H5.68a1.75 1.75 0 0 1-1.56-2.56C5.38 13.46 8.67 12 12 12Z"></path>
+                            </svg>
+                        </button>
+                        <div class="w-8 h-8 rounded-full bg-[#0078d4] text-white flex items-center justify-center text-sm font-medium cursor-pointer">苞</div>
+                    </div>
+                </header>
+
+                <div class="flex flex-1 min-h-0">
+                    <!-- 文件夹面板 -->
+                    <aside class="w-56 bg-white border-r border-[#111111] flex flex-col" aria-label="文件夹">
+                        <div class="p-4 border-b border-[#e5e2d9]">
+                            <h2 class="text-lg font-semibold text-[#111111]">收件箱</h2>
+                            <a class="text-sm text-[#0078d4] hover:underline mt-1 inline-block" href="#">管理文件夹</a>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto p-2">
+                            <section class="mb-4" aria-label="收藏">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">收藏</h3>
+                                <div class="space-y-1">
+                                    <a class="folder-item active flex items-center justify-between px-3 py-2 rounded text-sm" href="#" data-folder="inbox">
+                                        <span>收件箱</span>
+                                        <span class="bg-[#0078d4] text-white text-xs px-2 py-0.5 rounded-full" id="inboxCount">3</span>
+                                    </a>
+                                    <a class="folder-item flex items-center justify-between px-3 py-2 rounded text-sm text-[#111111]" href="#" data-folder="sent">
+                                        <span>已发送邮件</span>
+                                        <span class="text-xs text-gray-500">攻略</span>
+                                    </a>
+                                    <a class="folder-item flex items-center justify-between px-3 py-2 rounded text-sm text-[#111111]" href="#" data-folder="drafts">
+                                        <span>草稿箱</span>
+                                        <span class="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full" id="draftsCount">1</span>
+                                    </a>
+                                </div>
+                            </section>
+
+                            <section class="mb-4" aria-label="文件夹">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">文件夹</h3>
+                                <div class="space-y-1">
+                                    <a class="folder-item flex items-center px-3 py-2 rounded text-sm text-[#111111]" href="#" data-folder="archive">
+                                        <span>归档</span>
+                                    </a>
+                                    <a class="folder-item flex items-center justify-between px-3 py-2 rounded text-sm text-[#111111]" href="#" data-folder="spam">
+                                        <span>垃圾邮件</span>
+                                        <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">4</span>
+                                    </a>
+                                    <a class="folder-item flex items-center px-3 py-2 rounded text-sm text-[#111111]" href="#">
+                                        <span>已删除邮件</span>
+                                    </a>
+                                    <a class="folder-item flex items-center px-3 py-2 rounded text-sm text-[#111111]" href="#">
+                                        <span>发现</span>
+                                    </a>
+                                </div>
+                            </section>
+
+                            <section aria-label="组">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">组</h3>
+                                <p class="text-sm text-gray-400 px-2 italic">尚未加入任何组</p>
+                            </section>
+                        </div>
+                    </aside>
+
+                    <!-- 邮件列表 -->
+                    <section class="w-80 bg-white border-r border-[#111111] flex flex-col" aria-label="邮件列表">
+                        <div class="p-3 border-b border-[#e5e2d9] flex items-center justify-between">
+                            <button class="outlook-btn-primary px-4 py-2 rounded text-sm font-medium flex items-center" id="newMailButton">
+                                <i class="fa fa-plus mr-2"></i>
+                                新邮件
+                            </button>
+                            <div class="flex space-x-1">
+                                <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors" title="同步" aria-label="同步" id="syncMailButton">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M4 10a8 8 0 0 1 14.11-4.47l1.83-1.83v6h-6l2.08-2.08A5.5 5.5 0 1 0 17 13h2.05A7.5 7.5 0 1 1 4 10Z"></path>
+                                    </svg>
+                                </button>
+                                <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors" title="筛选" aria-label="筛选">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M4.75 5h14.5a.75.75 0 0 1 .58 1.23l-5.58 7.26v4.51a1 1 0 0 1-1.52.85l-2.5-1.6a1 1 0 0 1-.48-.86v-2.9L4.17 6.23A.75.75 0 0 1 4.75 5Z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex border-b border-[#e5e2d9]">
+                            <button class="flex-1 py-2 text-sm font-medium text-[#0078d4] border-b-2 border-[#0078d4]">重点</button>
+                            <button class="flex-1 py-2 text-sm font-medium text-gray-500 hover:text-[#111111] transition-colors">其他</button>
+                            <div class="flex items-center px-3 text-xs text-gray-500">
+                                <span>排序：最新优先</span>
+                                <svg class="w-3 h-3 ml-1" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7 10h10l-5-5Z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto mail-items" role="list"></div>
+                    </section>
+
+                    <!-- 阅读窗格 -->
+                    <section class="flex-1 bg-white flex flex-col" aria-label="阅读窗格">
+                        <header class="p-4 border-b border-[#e5e2d9]">
+                            <p class="reading-meta text-sm text-gray-600 mb-1"></p>
+                            <h1 class="reading-title text-xl font-semibold text-[#111111] mb-3"></h1>
+                            <div class="flex space-x-2">
+                                <button class="px-4 py-1.5 bg-[#0078d4] text-white rounded text-sm font-medium hover:bg-[#106ebe] transition-colors">回复</button>
+                                <button id="forwardBtn" class="px-4 py-1.5 bg-[#f1efe8] text-[#111111] border border-[#8a8886] rounded text-sm font-medium hover:bg-[#e5e2d9] transition-colors">转发</button>
+                                <button id="markBtn" class="px-4 py-1.5 bg-[#f1efe8] text-[#111111] border border-[#8a8886] rounded text-sm font-medium hover:bg-[#e5e2d9] transition-colors">标记/分类</button>
+                            </div>
+                        </header>
+                        <div class="reading-body flex-1 overflow-y-auto p-6 text-sm leading-relaxed"></div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- 云盘视图 -->
+            <section class="view-section drive-view" data-view="drive">
+                <header class="bg-white border-b border-[#111111] px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <span class="bg-[#0078d4] text-white px-3 py-1 rounded text-sm font-medium">云盘</span>
+                        <span class="text-sm font-medium text-[#111111]">所有文件</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors" title="刷新云盘" aria-label="刷新云盘" id="refreshDriveButton">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M4 10a8 8 0 0 1 14.11-4.47l1.83-1.83v6h-6l2.08-2.08A5.5 5.5 0 1 0 17 13h2.05A7.5 7.5 0 1 1 4 10Z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+                <div class="p-6" aria-label="云盘">
+                    <div class="bg-white border border-[#111111] outlook-card p-6 mb-4">
+                        <h2 class="text-xl font-semibold text-[#111111] mb-2">云盘文件</h2>
+                        <p class="text-sm text-gray-600">可直接预览与下载的共享文件</p>
+                    </div>
+                    <div class="drive-list space-y-2" id="driveList">
+                        <div class="drive-empty bg-white border border-[#111111] outlook-card">
+                            <div class="drive-empty-icon">📂</div>
+                            <p class="text-gray-500">暂无文件</p>
+                            <p class="text-sm text-gray-400 mt-2">向政府部门或关键证人发送申请后可获取证据文件</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 联系人视图 - 已修改为分类展示 -->
+            <section class="view-section contacts-view" data-view="contacts">
+                <header class="bg-white border-b border-[#111111] px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <span class="bg-[#0078d4] text-white px-3 py-1 rounded text-sm font-medium">联系人</span>
+                        <span class="text-sm font-medium text-[#111111]">我的网络</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors" title="添加联系人" aria-label="添加联系人">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 5a7 7 0 1 1 0 14 7 7 0 0 1 0-14Zm0 1.5A5.5 5.5 0 1 0 12 17 5.5 5.5 0 0 0 12 6.5Zm-.75 2h1.5v2.25H15v1.5h-2.25V14.5h-1.5v-2.25H9v-1.5h2.25Z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+                <div class="p-6 overflow-y-auto" style="max-height: calc(100vh - 140px);" aria-label="联系人">
+                    <div class="bg-white border border-[#111111] outlook-card p-6 mb-6">
+                        <h2 class="text-xl font-semibold text-[#111111] mb-2">调查人脉网络</h2>
+                        <p class="text-sm text-gray-600">点击联系人发送邮件获取线索与证据。关键证人可能掌握核心情报。</p>
+                    </div>
+                    <div id="contactsContainer"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="composeModal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal__content accent-bar-left">
+            <div class="modal__header">
+                <h3 id="modalTitle" class="text-lg font-semibold text-[#111111]">新邮件</h3>
+                <button class="text-gray-500 hover:text-[#111111] transition-colors" data-modal-close>
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <form class="modal__body" id="composeForm"></form>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- 邮件项模板 -->
+    <template id="mailItemTemplate">
+        <article class="mail-item p-3 cursor-pointer" role="listitem" data-generated="true">
+            <div class="flex items-start space-x-3">
+                <span class="item-avatar w-10 h-10 rounded-full bg-[#0078d4] text-white flex items-center justify-center text-sm font-medium flex-shrink-0"></span>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="item-sender text-sm font-medium text-[#111111] truncate"></span>
+                        <time class="item-time text-xs text-gray-500"></time>
+                    </div>
+                    <div class="item-subject text-sm text-[#111111] truncate mb-1"></div>
+                    <p class="item-preview text-xs text-gray-500 truncate"></p>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <!-- 云盘项模板 -->
+    <template id="driveItemTemplate">
+        <div class="drive-item bg-white border border-[#111111] p-4 flex items-center justify-between" data-generated="true">
+            <div class="flex items-center space-x-3">
+                <i class="fa fa-file-text-o text-[#0078d4] text-xl"></i>
+                <div>
+                    <strong class="drive-title text-sm font-medium text-[#111111] block"></strong>
+                    <span class="drive-info text-xs text-gray-500"></span>
+                </div>
+            </div>
+            <div class="flex space-x-2">
+                <button class="px-3 py-1 text-sm text-[#0078d4] hover:bg-[#e7f1ff] rounded transition-colors" data-action="view">预览</button>
+                <button class="px-3 py-1 text-sm text-[#0078d4] hover:bg-[#e7f1ff] rounded transition-colors" data-action="download">下载</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- 联系人分类模板 -->
+    <template id="contactCategoryTemplate">
+        <div class="contact-category" data-generated="true">
+            <div class="contact-category-header">
+                <span class="contact-category-title"></span>
+                <span class="contact-category-badge"></span>
+            </div>
+            <div class="contacts-list"></div>
+        </div>
+    </template>
+
+    <!-- 联系人卡片模板 -->
+    <template id="contactCardTemplate">
+        <div class="contact-card" data-generated="true">
+            <div class="contact-header">
+                <div class="contact-name-section">
+                    <div class="contact-name"></div>
+                    <div class="contact-title"></div>
+                </div>
+            </div>
+            <div class="contact-mail"></div>
+            <div class="contact-note"></div>
+            <div class="contact-description"></div>
+            <div class="contact-actions">
+                <button type="button" class="contact-btn">写信</button>
+            </div>
+            <div class="unlock-hint" style="display: none;"></div>
+        </div>
+    </template>
+
+    <script>
+        // 从外部JSON文件加载数据
+        async function loadMailData() {
+            try {
+                const response = await fetch('mail-data.json');
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('加载邮件数据失败:', error);
+                return null;
+            }
+        }
+
+        // 更新时间和日期
+        function updateDateTime() {
+            const now = new Date();
+            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${weekDays[now.getDay()]}`;
+            
+            const timeEl = document.getElementById('current-time');
+            if (timeEl) {
+                timeEl.textContent = `${dateStr} ${timeStr}`;
+            }
+        }
+
+        // 初始化时间
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // 初始化应用
+        (async function() {
+            // 加载外部数据
+            const mailData = await loadMailData();
+            
+            if (!mailData) {
+                showToast('❌ 无法加载数据文件');
+                return;
+            }
+
+            // 口令配置 - 政府部门需要的口令
+            const passwordConfig = {
+                'traffic': {
+                    correct: '智慧入住',
+                    options: ['请选择口令', '能耗数据', '清朗监测', '智慧入住', 'GPS轨迹', '车辆监控', '酒店监控', '入住记录', '网页快照', '网络监控'],
+                },
+                'culture': {
+                    correct: '清朗监测',
+                    options: ['请选择口令', '能耗数据', '清朗监测', '智慧入住', 'GPS轨迹', '车辆监控', '酒店监控', '入住记录', '网页快照', '网络监控'],
+                },
+                'cyber': {
+                    correct: '能耗数据',
+                    options: ['请选择口令', '能耗数据', '清朗监测', '智慧入住', 'GPS轨迹', '车辆监控', '酒店监控', '入住记录', '网页快照', '网络监控'],
+                }
+            };
+
+            // 游戏数据配置
+            const gameData = {
+                contacts: mailData.contacts || [],
+                driveFiles: mailData.driveFiles || {},
+                autoReplies: mailData.autoReplies || {},
+                wrongReplies: {
+                    'traffic': {
+                        sender: "南山市交通运输局",
+                        email: "data@nanshan.gov.cn",
+                        subject: "Re: 关于您的信息公开申请 - 申请内容不符",
+                        preview: "您的申请内容不符合数据公开范围，无法提供相关数据...",
+                        body: "尊敬的申请人：\n\n感谢您提交信息公开申请。\n\n经审核，您申请的内容描述不够具体，或申请的数据类型不在我局公开范围内。根据《政府信息公开条例》相关规定，我局无法提供您所申请的数据。\n\n如您需要申请GPS轨迹或车辆运行数据，请在申请中明确说明：\n1. 具体的时间范围\n2. 涉及的车辆或路线信息\n3. 申请用途的详细说明\n4. 相关的法律依据\n\n请完善申请内容后重新提交。\n\n南山市交通运输局\n数据公开办公室\n2025年11月12日"
+                    },
+                    'culture': {
+                        sender: "南山市文旅局",
+                        email: "hotel@nanshan.gov.cn",
+                        subject: "Re: 酒店能耗数据公开申请回复 - 申请未通过",
+                        preview: "您申请的酒店监测数据未通过审核，请检查申请内容...",
+                        body: "尊敬的申请人：\n\n您依据《政府信息公开条例》提交的申请经审核未通过。\n\n原因：申请内容不符合酒店业能耗监测数据的公开条件，或申请中未包含必要的申请口令/关键词。\n\n如您需要申请酒店能耗或入住相关数据，请确保：\n1. 申请用途符合公共利益或新闻报道需要\n2. 提供明确的酒店名称和时间范围\n3. 包含正确的申请关键词\n4. 附上相关身份证明或单位介绍信\n\n请核对后重新提交申请。\n\n南山市文旅局\n酒店业监管科\n2025年11月12日"
+                    },
+                    'cyber': {
+                        sender: "南山市网信办",
+                        email: "snapshot@nanshan.gov.cn",
+                        subject: "Re: 网页快照申请回复 - 无法提供数据",
+                        preview: "您的网页快照申请无法受理，缺少必要信息...",
+                        body: "尊敬的申请人：\n\n您提交的网页快照取证申请无法受理。\n\n原因：申请中缺少必要的验证信息或关键词，无法确认申请的合法性和必要性。\n\n如需申请网页快照或历史缓存数据，请确保申请中包含：\n1. 明确的网页URL地址\n2. 具体的快照时间范围\n3. 申请取证的法律依据\n4. 正确的申请验证关键词\n\n请补充完整信息后重新提交。\n\n南山市网信办\n网络信息管理处\n2025年11月12日"
+                    }
+                }
+            };
+
+            // 状态管理
+            const state = {
+                currentFolder: 'inbox',
+                acquiredFiles: [],
+                mails: mailData.inbox?.mails || [],
+                contacts: gameData.contacts,
+                currentOpenMailId: null,
+                currentGuideView: 'original', // 'original', 'forward', 'mark'
+                quizCompleted: false, // 案件梳理是否已完成
+                currentComposeContact: null // 当前正在写信的联系人
+            };
+
+            // DOM 元素
+            const mailListContainer = document.querySelector('.mail-items');
+            const readingMeta = document.querySelector('.reading-meta');
+            const readingTitle = document.querySelector('.reading-title');
+            const readingBody = document.querySelector('.reading-body');
+            const composeModal = document.getElementById('composeModal');
+            const composeForm = document.getElementById('composeForm');
+            const toast = document.getElementById('toast');
+            const driveList = document.getElementById('driveList');
+            const contactsContainer = document.getElementById('contactsContainer');
+            const newMailBtn = document.getElementById('newMailButton');
+            const mailTemplate = document.getElementById('mailItemTemplate');
+            const driveTemplate = document.getElementById('driveItemTemplate');
+            const navItems = document.querySelectorAll('.rail-item[data-target]');
+            const viewSections = document.querySelectorAll('.view-section');
+            const folderItems = document.querySelectorAll('.folder-item[data-folder]');
+            const categoryTemplate = document.getElementById('contactCategoryTemplate');
+            const contactCardTemplate = document.getElementById('contactCardTemplate');
+            const forwardBtn = document.getElementById('forwardBtn');
+            const markBtn = document.getElementById('markBtn');
+
+            // 工具函数
+            const templateClone = (tpl) => tpl.content.firstElementChild.cloneNode(true);
+
+            const formatBody = (body) => {
+                body = body.replace(/<span class="evidence-tag">(.*?)<\/span>/g, 
+                    '<span class="evidence-tag">$1</span>');
+                body = body.replace(/<div class="game-hint">(.*?)<\/div>/g, 
+                    '<div class="game-hint">$1</div>');
+                
+                return body
+                    .split('\n')
+                    .map((paragraph) => {
+                        if (paragraph.startsWith('===')) {
+                            return `<h3 style="color: #0078d4; margin: 10px 0 6px; font-size: 15px; font-weight: 700;">${paragraph.replace(/===/g, '').trim()}</h3>`;
+                        }
+                        if (paragraph.startsWith('<span class="evidence-tag">')) {
+                            return `<p style="margin: 4px 0; line-height: 1.4; font-size: 13px;">${paragraph}</p>`;
+                        }
+                        if (paragraph.startsWith('<div class="game-hint">')) {
+                            return paragraph;
+                        }
+                        if (paragraph.startsWith('<strong>')) {
+                            return `<p style="margin: 6px 0; font-weight: 600; font-size: 13px;">${paragraph}</p>`;
+                        }
+                        if (paragraph.trim() === '') {
+                            return '';
+                        }
+                        return `<p style="margin: 4px 0; line-height: 1.5; font-size: 13px;">${paragraph}</p>`;
+                    })
+                    .filter(p => p !== '')
+                    .join('');
+            };
+
+            const showToast = (message) => {
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            };
+
+            // 视图切换
+            const switchView = (target) => {
+                navItems.forEach((item) => {
+                    const isActive = item.dataset.target === target;
+                    item.classList.toggle('active', isActive);
+                    if (isActive) {
+                        item.setAttribute('aria-current', 'page');
+                    } else {
+                        item.removeAttribute('aria-current');
+                    }
+                });
+
+                viewSections.forEach((section) => {
+                    section.classList.toggle('active', section.dataset.view === target);
+                });
+            };
+
+            // 获取当前文件夹的邮件数据
+            const getFolderMails = (folderName) => {
+                switch(folderName) {
+                    case 'inbox':
+                        return mailData.inbox?.mails || [];
+                    case 'sent':
+                        return mailData.sent?.mails || [];
+                    case 'drafts':
+                        return mailData.drafts?.mails || [];
+                    case 'archive':
+                        return mailData.archive?.mails || [];
+                    default:
+                        return [];
+                }
+            };
+
+            // 渲染攻略内容（从JSON读取）
+            const renderGuideContent = (guideData, type) => {
+                const isForward = type === 'forward';
+                const headerClass = isForward ? '' : 'mark';
+                const bodyClass = isForward ? '' : 'mark';
+                const icon = isForward ? '📤' : '🏷️';
+                const otherType = isForward ? 'mark' : 'forward';
+                const otherIcon = isForward ? '🏷️' : '📤';
+                
+                // 构建内容HTML
+                let contentHtml = '';
+                
+                // 添加主要提示内容
+                if (guideData.content && guideData.content.length > 0) {
+                    contentHtml += `<div class="guide-content-body ${bodyClass}"><h4>${guideData.title || '攻略提示'}</h4><ul>`;
+                    guideData.content.forEach(item => {
+                        contentHtml += `<li>${item}</li>`;
+                    });
+                    contentHtml += '</ul></div>';
+                }
+                
+                // 添加提示框
+                if (guideData.tip) {
+                    contentHtml += `<div class="guide-tip-box">${guideData.tip}</div>`;
+                }
+                
+                // 添加警告框
+                if (guideData.warning) {
+                    contentHtml += `<div class="guide-warning-box">${guideData.warning}</div>`;
+                }
+                
+                return `
+                    <div class="guide-content-header ${headerClass}">
+                        <h3>
+                            <span>${icon}</span>
+                            <span>${guideData.headerTitle || '攻略提示'}</span>
+                            <span class="guide-level-badge">${guideData.level || '提示'}</span>
+                        </h3>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+
+                        ${contentHtml}
+                    </div>
+                    <div class="guide-action-hint">
+                        点击"${isForward ? '标记/分类' : '转发'}"按钮可以查看另一种类型的攻略提示
+                    </div>
+                `;
+            };
+
+            // 更新按钮状态
+            const updateButtonStates = (activeButton) => {
+                // 重置所有按钮
+                forwardBtn.classList.remove('btn-active-forward');
+                markBtn.classList.remove('btn-active-mark');
+                
+                // 激活当前按钮
+                if (activeButton === 'forward') {
+                    forwardBtn.classList.add('btn-active-forward');
+                    forwardBtn.innerHTML = '<i class="fa fa-share mr-1"></i> 攻略提示中';
+                    markBtn.innerHTML = '标记/分类';
+                } else if (activeButton === 'mark') {
+                    markBtn.classList.add('btn-active-mark');
+                    markBtn.innerHTML = '<i class="fa fa-tag mr-1"></i> 攻略提示中';
+                    forwardBtn.innerHTML = '转发';
+                } else {
+                    forwardBtn.innerHTML = '转发';
+                    markBtn.innerHTML = '标记/分类';
+                }
+            };
+
+            // 生成案件梳理选择题HTML
+            const generateQuizHTML = () => {
+                const questions = [    
+                ];
+
+                let html = ``;
+
+                return html;
+            };
+
+
+
+            // 邮件渲染
+            const renderMails = () => {
+                mailListContainer.innerHTML = '';
+                const mailsToShow = getFolderMails(state.currentFolder);
+                
+                // 更新各文件夹未读计数
+                const updateBadge = (folder, elementId) => {
+                    const mails = getFolderMails(folder);
+                    const unreadCount = mails.filter(m => m.unread).length;
+                    const badge = document.getElementById(elementId);
+                    if (badge) {
+                        if (unreadCount > 0) {
+                            badge.textContent = unreadCount;
+                            badge.style.display = 'inline';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                };
+
+                updateBadge('inbox', 'inboxCount');
+                updateBadge('drafts', 'draftsCount');
+                
+                mailsToShow.forEach((mail) => {
+                    const node = templateClone(mailTemplate);
+                    node.dataset.id = mail.id;
+                    node.querySelector('.item-avatar').textContent = mail.sender[0];
+                    node.querySelector('.item-sender').textContent = mail.sender;
+                    node.querySelector('.item-time').textContent = mail.time;
+                    node.querySelector('.item-time').dateTime = mail.datetime;
+                    node.querySelector('.item-subject').textContent = mail.subject;
+                    node.querySelector('.item-preview').textContent = mail.preview;
+                    if (mail.unread) node.classList.add('unread');
+                    if (mail.isGuide) {
+                        node.classList.add('guide-mail');
+                    }
+                    node.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openMail(mail.id);
+                    });
+                    mailListContainer.appendChild(node);
+                });
+            };
+
+            const openMail = (id) => {
+                // 从所有可能的文件夹中查找邮件
+                const allFolders = ['inbox', 'sent', 'drafts', 'archive'];
+                let mail = null;
+                
+                for (const folder of allFolders) {
+                    const mails = getFolderMails(folder);
+                    mail = mails.find((item) => item.id === id);
+                    if (mail) break;
+                }
+                
+                if (!mail) return;
+                
+                // 保存当前打开的邮件ID
+                state.currentOpenMailId = id;
+                state.currentGuideView = 'original';
+                
+                // 重置按钮状态
+                updateButtonStates('none');
+                
+                if (mail.unread) {
+                    mail.unread = false;
+                    renderMails();
+                }
+                
+                readingMeta.innerHTML = `${mail.sender} · <span style="color: #0078d4; font-weight: 500;">${mail.email}</span>`;
+                readingTitle.textContent = mail.subject;
+                
+                // 如果是草稿箱的案件梳理邮件，添加选择题
+                let bodyContent = formatBody(mail.body);
+                if (mail.id === 'draft-1' && !state.quizCompleted) {
+                    bodyContent += generateQuizHTML();
+                } else if (mail.id === 'draft-1' && state.quizCompleted) {
+                    bodyContent += `<div class="quiz-container" style="border-color: #28a745;"><div class="quiz-title" style="color: #28a745;">✅ 案件梳理已完成</div><p style="font-size: 13px; color: #666;">您已获得新邮件，请查看收件箱。</p></div>`;
+                }
+                
+                readingBody.innerHTML = bodyContent;
+            };
+
+            // 云盘渲染
+            const renderDrive = () => {
+                if (state.acquiredFiles.length === 0) {
+                    driveList.innerHTML = `
+                        <div class="drive-empty bg-white border border-[#111111] outlook-card">
+                            <div class="drive-empty-icon">📂</div>
+                            <p class="text-gray-500">暂无文件</p>
+                            <p class="text-sm text-gray-400 mt-2">向政府部门或关键证人发送申请后可获取证据文件</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                driveList.innerHTML = '';
+                state.acquiredFiles.forEach((fileId) => {
+                    const file = gameData.driveFiles[fileId];
+                    if (!file) return;
+                    
+                    const node = templateClone(driveTemplate);
+                    node.dataset.id = file.id;
+                    node.classList.add('unlocked-file');
+                    node.querySelector('.drive-title').textContent = file.name;
+                    node.querySelector('.drive-info').textContent = file.info;
+                    
+                    node.querySelectorAll('button').forEach((btn) => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (btn.dataset.action === 'view') {
+                                previewFile(file);
+                            } else {
+                                showToast(`📥 正在下载 ${file.name}`);
+                            }
+                        });
+                    });
+                    driveList.appendChild(node);
+                });
+            };
+
+            // 联系人渲染 - 按分类显示
+            const renderContacts = () => {
+                contactsContainer.innerHTML = '';
+                
+                // 按分类分组
+                const categories = {
+                    '政府部门': [],
+                    '同事/朋友': [],
+                    '关键证人': []
+                };
+                
+                state.contacts.forEach(contact => {
+                    const cat = contact.category || '其他';
+                    if (categories[cat]) {
+                        categories[cat].push(contact);
+                    }
+                });
+                
+                // 渲染每个分类
+                const categoryOrder = ['政府部门', '同事/朋友', '关键证人'];
+                const categoryColors = {
+                    '政府部门': 'gov',
+                    '同事/朋友': 'friend',
+                    '关键证人': 'witness'
+                };
+                
+                categoryOrder.forEach(catName => {
+                    const contacts = categories[catName];
+                    if (contacts.length === 0) return;
+                    
+                    const catNode = templateClone(categoryTemplate);
+                    catNode.querySelector('.contact-category-title').textContent = catName;
+                    const badge = catNode.querySelector('.contact-category-badge');
+                    badge.textContent = `${contacts.length}人`;
+                    badge.classList.add(categoryColors[catName]);
+                    
+                    const listContainer = catNode.querySelector('.contacts-list');
+                    
+                    contacts.forEach(contact => {
+                        const card = templateClone(contactCardTemplate);
+                        
+                        // 设置基本信息
+                        card.querySelector('.contact-name').textContent = contact.name;
+                        card.querySelector('.contact-title').textContent = contact.title;
+                        card.querySelector('.contact-mail').textContent = contact.email;
+                        card.querySelector('.contact-description').textContent = contact.description;
+                        
+                        // 设置备注
+                        const noteEl = card.querySelector('.contact-note');
+                        if (contact.note) {
+                            noteEl.textContent = contact.note;
+                        } else {
+                            noteEl.style.display = 'none';
+                        }
+                        
+                        // 关键证人特殊样式
+                        if (contact.isKeyWitness) {
+                            card.classList.add('witness');
+                        }
+                        
+                        // 锁定状态检查
+                        let isLocked = false;
+                        if (contact.locked && contact.requireUnlock) {
+                            const requiredFiles = contact.requireUnlock.map(id => {
+                                const fileKey = Object.keys(gameData.driveFiles).find(k => 
+                                    gameData.driveFiles[k].type === id
+                                );
+                                return fileKey;
+                            });
+                            
+                            isLocked = !requiredFiles.every(fileKey => 
+                                state.acquiredFiles.includes(fileKey)
+                            );
+                            
+                            if (isLocked) {
+                                card.classList.add('locked');
+                                const hintEl = card.querySelector('.unlock-hint');
+                                hintEl.style.display = 'block';
+                                const requiredNames = contact.requireUnlock.map(id => {
+                                    const c = state.contacts.find(x => x.id === id);
+                                    return c ? c.name : id;
+                                }).join('、');
+                                hintEl.textContent = `🔒 需先联系: ${requiredNames}`;
+                            }
+                        }
+                        
+                        // 按钮设置
+                        const btn = card.querySelector('.contact-btn');
+                        if (isLocked) {
+                            btn.classList.add('locked');
+                            btn.textContent = '未解锁';
+                            btn.disabled = true;
+                        } else {
+                            if (contact.isKeyWitness) {
+                                btn.classList.add('witness-btn');
+                            } else {
+                                btn.classList.add('primary');
+                            }
+                            btn.textContent = '写信';
+                            btn.addEventListener('click', () => composeTo(contact));
+                        }
+                        
+                        listContainer.appendChild(card);
+                    });
+                    
+                    contactsContainer.appendChild(catNode);
+                });
+            };
+
+            // 模态窗逻辑
+            const openModal = () => {
+                composeModal.classList.add('open');
+                composeModal.setAttribute('aria-hidden', 'false');
+            };
+
+            const closeModal = () => {
+                composeModal.classList.remove('open');
+                composeModal.setAttribute('aria-hidden', 'true');
+                if (composeForm.reset) composeForm.reset();
+                state.currentComposeContact = null;
+            };
+
+            const bindModalClose = () => {
+                composeModal.querySelectorAll('[data-modal-close]').forEach((btn) =>
+                    btn.addEventListener('click', closeModal, { once: true })
+                );
+            };
+
+            const setComposeForm = ({ to = '', subject = '', body = '', contact = null }) => {
+                state.currentComposeContact = contact;
+                
+                // 检查是否需要口令选择（政府部门）
+                const needsPassword = contact && passwordConfig[contact.id];
+                
+                let passwordSelectHTML = '';
+                if (needsPassword) {
+                    const config = passwordConfig[contact.id];
+                    passwordSelectHTML = `
+                        <div class="password-select-container">
+                            <label>选择申请口令（必须选择正确口令才能获得数据）</label>
+                            <select class="password-select" name="password" required>
+                                ${config.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                }
+                
+                composeForm.innerHTML = `
+                    ${passwordSelectHTML}
+                    <label class="block text-sm text-gray-600 mb-1">收件人<input type="email" name="to" value="${to}" required readonly class="w-full mt-1 px-3 py-2 bg-gray-100 border border-[#8a8886] rounded text-sm"/></label>
+                    <label class="block text-sm text-gray-600 mb-1 mt-3">主题<input type="text" name="subject" value="${subject}" required placeholder="建议包含'申请公开'、'信息调取'等关键词" class="w-full mt-1 px-3 py-2 border border-[#8a8886] rounded text-sm outlook-input"/></label>
+                    <label class="block text-sm text-gray-600 mb-1 mt-3">申请内容<textarea name="body" required placeholder="请说明：1.调查记者身份 2.具体数据需求 3.时间范围 4.法律依据" class="w-full mt-1 px-3 py-2 border border-[#8a8886] rounded text-sm outlook-input" style="min-height: 120px; line-height: 1.5;">${body}</textarea></label>
+                    <div class="flex justify-end space-x-2 mt-4">
+                        <button type="button" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors" data-modal-close>取消</button>
+                        <button type="submit" class="px-4 py-2 text-sm text-white bg-[#0078d4] hover:bg-[#106ebe] rounded transition-colors">发送申请</button>
+                    </div>
+                `;
+                bindModalClose();
+            };
+
+            const composeTo = (contact) => {
+                const isKeyWitness = contact.isKeyWitness;
+                const titlePrefix = isKeyWitness ? '向关键证人' : '向';
+                document.getElementById('modalTitle').textContent = `${titlePrefix}${contact.name}发送邮件`;
+                
+                let defaultSubject = '';
+                let defaultBody = '';
+                
+                if (contact.category === '政府部门') {
+                    defaultSubject = `申请公开${contact.description.replace(/负责/g, '').replace(/数据/g, '')}相关数据`;
+                    defaultBody = `尊敬的${contact.name}：\n     根据《中华人民共和国政府信息公开条例》及相关规定，本人/本单位因工作需要，特向贵局申请公开以下网络监管及数据安全相关政府信息，恳请予以配合。\n申请公开内容：主要围绕${contact.name}\n恳请贵局在法定期限内予以答复，若无法公开相关信息，请说明理由。感谢贵局对政府信息公开工作的支持与配合
+                    此致\n敬礼\n2025年11月12日`;
+                }
+                
+                setComposeForm({
+                    to: contact.email,
+                    subject: defaultSubject,
+                    body: defaultBody,
+                    contact: contact
+                });
+                openModal();
+            };
+
+            const previewFile = (file) => {
+                document.getElementById('modalTitle').textContent = `查看证据 · ${file.name}`;
+                composeForm.innerHTML = `
+                    <div style="max-height: 60vh; overflow-y: auto; padding: 12px; background: #f8f9fa; border-radius: 8px; font-family: 'Segoe UI', monospace; white-space: pre-wrap; line-height: 1.5; font-size: 13px; color: #111111;">${file.content}</div>
+                    <div class="flex justify-end space-x-2 mt-4">
+                        <button type="button" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors" data-modal-close>关闭</button>
+                        <button type="button" class="px-4 py-2 text-sm text-white bg-[#0078d4] hover:bg-[#106ebe] rounded transition-colors" onclick="document.querySelector('[data-modal-close]').click(); showToast('📥 证据已保存至本地')">保存证据</button>
+                    </div>
+                `;
+                bindModalClose();
+                openModal();
+            };
+
+            // 事件监听
+            navItems.forEach((item) => {
+                item.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const target = item.dataset.target;
+                    if (target) switchView(target);
+                });
+            });
+
+            folderItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    folderItems.forEach(f => f.classList.remove('active'));
+                    item.classList.add('active');
+                    state.currentFolder = item.dataset.folder;
+                    renderMails();
+                });
+            });
+
+            composeModal.addEventListener('click', (event) => {
+                if (event.target === composeModal) closeModal();
+            });
+
+            // 转发按钮事件 - 显示转发攻略内容（从JSON读取）
+            forwardBtn.addEventListener('click', () => {
+                if (state.currentFolder !== 'sent') {
+                    showToast('⚠️ 此功能仅在查看已发送的攻略邮件时可用');
+                    return;
+                }
+                
+                // 查找当前打开的邮件
+                const mail = getFolderMails('sent').find(m => m.id === state.currentOpenMailId);
+                if (!mail) {
+                    showToast('⚠️ 请先选择一封攻略邮件');
+                    return;
+                }
+                
+                // 检查是否是攻略邮件
+                if (!mail.isGuide) {
+                    showToast('⚠️ 此邮件不是攻略邮件');
+                    return;
+                }
+                
+                // 检查是否有转发攻略内容
+                if (!mail.guideContent || !mail.guideContent.forward) {
+                    showToast('⚠️ 此邮件没有配置转发攻略内容');
+                    return;
+                }
+                
+                // 切换视图状态
+                if (state.currentGuideView === 'forward') {
+                    // 如果已经在转发视图，切回原邮件
+                    state.currentGuideView = 'original';
+                    updateButtonStates('none');
+                    readingBody.innerHTML = formatBody(mail.body);
+                    showToast('📧 已恢复原始邮件内容');
+                } else {
+                    // 显示转发攻略内容
+                    state.currentGuideView = 'forward';
+                    updateButtonStates('forward');
+                    const guideData = {
+                        ...mail.guideContent.forward,
+                        originalSubject: mail.subject
+                    };
+                    readingBody.innerHTML = renderGuideContent(guideData, 'forward');
+                    showToast('📤 已显示转发攻略提示');
+                }
+            });
+
+            // 标记/分类按钮事件 - 显示标记攻略内容（从JSON读取）
+            markBtn.addEventListener('click', () => {
+                if (state.currentFolder !== 'sent') {
+                    showToast('⚠️ 此功能仅在查看已发送的攻略邮件时可用');
+                    return;
+                }
+                
+                // 查找当前打开的邮件
+                const mail = getFolderMails('sent').find(m => m.id === state.currentOpenMailId);
+                if (!mail) {
+                    showToast('⚠️ 请先选择一封攻略邮件');
+                    return;
+                }
+                
+                // 检查是否是攻略邮件
+                if (!mail.isGuide) {
+                    showToast('⚠️ 此邮件不是攻略邮件');
+                    return;
+                }
+                
+                // 检查是否有标记攻略内容
+                if (!mail.guideContent || !mail.guideContent.mark) {
+                    showToast('⚠️ 此邮件没有配置标记攻略内容');
+                    return;
+                }
+                
+                // 切换视图状态
+                if (state.currentGuideView === 'mark') {
+                    // 如果已经在标记视图，切回原邮件
+                    state.currentGuideView = 'original';
+                    updateButtonStates('none');
+                    readingBody.innerHTML = formatBody(mail.body);
+                    showToast('📧 已恢复原始邮件内容');
+                } else {
+                    // 显示标记攻略内容
+                    state.currentGuideView = 'mark';
+                    updateButtonStates('mark');
+                    const guideData = {
+                        ...mail.guideContent.mark,
+                        originalSubject: mail.subject
+                    };
+                    readingBody.innerHTML = renderGuideContent(guideData, 'mark');
+                    showToast('🏷️ 已显示标记攻略内容');
+                }
+            });
+
+            // 发送邮件（核心游戏逻辑）
+            composeForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(composeForm);
+                const subject = formData.get('subject');
+                const body = formData.get('body');
+                const to = formData.get('to');
+                const password = formData.get('password');
+
+                // 查找匹配的联系人
+                const contact = state.contacts.find(c => c.email === to);
+                if (!contact) {
+                    showToast('❌ 未知的收件人地址');
+                    return;
+                }
+
+                // 检查是否需要口令验证（政府部门）
+                const needsPassword = passwordConfig[contact.id];
+                let isPasswordCorrect = true;
+                
+                if (needsPassword) {
+                    if (!password || password === '请选择口令') {
+                        showToast('⚠️ 请选择申请口令');
+                        return;
+                    }
+                    isPasswordCorrect = password === needsPassword.correct;
+                }
+
+                // 检查关键词触发
+                const hasKeywords = contact.triggerKeywords.some(kw => 
+                    subject.includes(kw) || body.includes(kw)
+                );
+
+                if (!hasKeywords) {
+                    showToast('⚠️ 邮件内容未包含必要的关键信息，请补充后重试');
+                    return;
+                }
+
+                closeModal();
+                showToast('📤 邮件已发送，等待回复...');
+
+                // 添加到已发送
+                const timestamp = new Date();
+                const sentMail = {
+                    id: `sent-${timestamp.getTime()}`,
+                    sender: '我',
+                    email: 'bao.mi@shennandaily.com',
+                    time: timestamp.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+                    datetime: timestamp.toISOString(),
+                    subject: subject,
+                    preview: body.slice(0, 60) + '...',
+                    body: body,
+                    unread: false,
+                };
+                
+                // 模拟自动回复
+                setTimeout(() => {
+                    let replyTemplate;
+                    
+                    // 如果口令错误或者是政府部门但没有正确口令，发送错误回复
+                    if (needsPassword && !isPasswordCorrect) {
+                        replyTemplate = gameData.wrongReplies[contact.id];
+                        showToast('❌ 口令错误，未获得数据附件');
+                    } else {
+                        replyTemplate = gameData.autoReplies[contact.id];
+                    }
+                    
+                    if (!replyTemplate) return;
+
+                    const replyTime = new Date();
+                    const replyMail = {
+                        id: `reply-${replyTime.getTime()}`,
+                        sender: replyTemplate.sender,
+                        email: replyTemplate.email,
+                        time: replyTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+                        datetime: replyTime.toISOString(),
+                        subject: replyTemplate.subject,
+                        preview: replyTemplate.preview,
+                        body: replyTemplate.body,
+                        unread: true,
+                    };
+
+                    state.mails.unshift(replyMail);
+                    
+                    // 只有口令正确时才解锁对应文件
+                    if (!needsPassword || isPasswordCorrect) {
+                        const fileKey = Object.keys(gameData.driveFiles).find(k => 
+                            gameData.driveFiles[k].type === contact.id
+                        );
+                        
+                        if (fileKey && !state.acquiredFiles.includes(fileKey)) {
+                            state.acquiredFiles.push(fileKey);
+                            renderDrive();
+                            renderContacts(); // 重新渲染联系人以更新锁定状态
+                            showToast(`✅ 收到回复，云盘已新增证据：${gameData.driveFiles[fileKey].name}`);
+                        } else {
+                            showToast('✅ 已收到对方回复');
+                        }
+                    } else {
+                        showToast('⚠️ 由于口令错误，未获得数据附件');
+                    }
+
+                    renderMails();
+                    if (document.querySelector('.view-section.active').dataset.view !== 'mail') {
+                        switchView('mail');
+                    }
+                }, 2500);
+            });
+
+            newMailBtn.addEventListener('click', () => {
+                document.getElementById('modalTitle').textContent = '新建邮件';
+                setComposeForm({ to: '', subject: '', body: '', contact: null });
+                // 移除readonly让玩家自己选择
+                const toInput = composeForm.querySelector('input[name="to"]');
+                if (toInput) {
+                    toInput.removeAttribute('readonly');
+                    toInput.classList.remove('bg-gray-100');
+                    toInput.classList.add('outlook-input');
+                }
+                openModal();
+            });
+
+            document.getElementById('refreshDriveButton').addEventListener('click', () => {
+                renderDrive();
+                showToast('🔄 证据云盘已刷新');
+            });
+
+            document.getElementById('syncMailButton').addEventListener('click', () => {
+                showToast('🔄 邮件系统已同步');
+                renderMails();
+            });
+
+            // 初始化
+            renderMails();
+            renderDrive();
+            renderContacts();
+            if (state.mails.length > 0) {
+                openMail(state.mails[0].id);
+            }
+            switchView('mail');
+        })();
+    </script>
+</body>
+</html>
