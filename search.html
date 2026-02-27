@@ -1707,25 +1707,65 @@
         }
 
         // ==================== 交互 ====================
-        function handleNodeDown(e) { 
-            if (connectMode || mergeMode) { 
-                e.stopPropagation(); 
-                e.preventDefault(); 
-                return; 
-            } 
-            e.stopPropagation(); 
-            e.preventDefault(); 
-            const node = e.currentTarget; 
-            isDragging = true; 
-            dragNode = node; 
-            const rect = node.getBoundingClientRect(); 
-            dragOffset.x = e.clientX - (rect.left + rect.width / 2); 
-            dragOffset.y = e.clientY - (rect.top + rect.height / 2); 
-            node.classList.add('dragging'); 
-            nodeLayer.classList.add('dragging-node'); 
+        function handleNodeDown(e) {
+            if (connectMode || mergeMode) {
+                e.stopPropagation();
+                e.preventDefault();
+                return;
+            }
+            e.stopPropagation();
+            e.preventDefault();
+            
+            const node = e.currentTarget;
+            
+            // 记录按下时的位置，用于检测是否为真实拖拽
+            const startX = e.clientX;
+            const startY = e.clientY;
+            
+            // 设置一个拖拽阈值，只有移动超过一定距离才认为是拖拽
+            const dragThreshold = 5; // 5像素的阈值
+            
+            const onMouseMove = (moveEvent) => {
+                const dx = Math.abs(moveEvent.clientX - startX);
+                const dy = Math.abs(moveEvent.clientY - startY);
+                
+                if (dx > dragThreshold || dy > dragThreshold) {
+                    // 超过阈值，认为是拖拽操作
+                    if (!isDragging) {
+                        isDragging = true;
+                        dragNode = node;
+                        const rect = node.getBoundingClientRect();
+                        dragOffset.x = moveEvent.clientX - (rect.left + rect.width / 2);
+                        dragOffset.y = moveEvent.clientY - (rect.top + rect.height / 2);
+                        node.classList.add('dragging');
+                        nodeLayer.classList.add('dragging-node');
+                    }
+                }
+            };
+            
+            const onMouseUp = () => {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                
+                // 如果没有触发拖拽，且是点击操作，执行选择逻辑
+                if (!isDragging) {
+                    handleNodeClick(e);
+                } else {
+                    // 清理拖拽状态
+                    node.classList.remove('dragging');
+                    nodeLayer.classList.remove('dragging-node');
+                    isDragging = false;
+                    dragNode = null;
+                    document.getElementById('trash-zone').classList.remove('active');
+                }
+            };
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
         }
 
         function handleNodeClick(e) {
+            if (isDragging) return;
             const node = e.currentTarget;
             const nodeId = node.id;
 
