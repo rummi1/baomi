@@ -1708,64 +1708,124 @@
 
         // ==================== 交互 ====================
         function handleNodeDown(e) {
-            if (connectMode || mergeMode) {
-                e.stopPropagation();
-                e.preventDefault();
-                return;
+    if (connectMode || mergeMode) {
+        e.stopPropagation();
+        e.preventDefault();
+        return;
+    }
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const node = e.currentTarget;
+    
+    // 记录按下时的位置，用于检测是否为真实拖拽
+    const startX = e.clientX;
+    const startY = e.clientY;
+    
+    // 获取节点的当前世界坐标
+    const worldX = parseFloat(node.dataset.x);
+    const worldY = parseFloat(node.dataset.y);
+    
+    // 将世界坐标转换为屏幕坐标（节点中心位置）
+    const screenPos = worldToScreen(worldX, worldY);
+    
+    // 计算鼠标相对于节点中心的偏移（屏幕坐标）
+    dragOffset.x = screenPos.x - startX;
+    dragOffset.y = screenPos.y - startY;
+    
+    // 设置一个拖拽阈值，只有移动超过一定距离才认为是拖拽
+    const dragThreshold = 5;
+    let dragStarted = false;
+    
+    const onMouseMove = (moveEvent) => {
+        const dx = Math.abs(moveEvent.clientX - startX);
+        const dy = Math.abs(moveEvent.clientY - startY);
+        
+        if (dx > dragThreshold || dy > dragThreshold) {
+            if (!dragStarted) {
+                dragStarted = true;
+                isDragging = true;
+                dragNode = node;
+                node.classList.add('dragging');
+                nodeLayer.classList.add('dragging-node');
             }
-            e.stopPropagation();
-            e.preventDefault();
             
-            const node = e.currentTarget;
-            
-            // 记录按下时的位置，用于检测是否为真实拖拽
-            const startX = e.clientX;
-            const startY = e.clientY;
-            
-            // 设置一个拖拽阈值，只有移动超过一定距离才认为是拖拽
-            const dragThreshold = 5; // 5像素的阈值
-            
-            const onMouseMove = (moveEvent) => {
-                const dx = Math.abs(moveEvent.clientX - startX);
-                const dy = Math.abs(moveEvent.clientY - startY);
+            if (dragStarted) {
+                // 计算节点应该出现的屏幕位置：鼠标位置 + 偏移量
+                const targetScreenX = moveEvent.clientX + dragOffset.x;
+                const targetScreenY = moveEvent.clientY + dragOffset.y;
                 
-                if (dx > dragThreshold || dy > dragThreshold) {
-                    // 超过阈值，认为是拖拽操作
-                    if (!isDragging) {
-                        isDragging = true;
-                        dragNode = node;
-                        const rect = node.getBoundingClientRect();
-                        dragOffset.x = moveEvent.clientX - (rect.left + rect.width / 2);
-                        dragOffset.y = moveEvent.clientY - (rect.top + rect.height / 2);
-                        node.classList.add('dragging');
-                        nodeLayer.classList.add('dragging-node');
-                    }
-                }
-            };
-            
-            const onMouseUp = () => {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
+                // 转换为世界坐标
+                const worldPos = screenToWorld(targetScreenX, targetScreenY);
                 
-                // 如果没有触发拖拽，且是点击操作，执行选择逻辑
-                if (!isDragging) {
-                    handleNodeClick(e);
+                // 更新节点的数据坐标
+                node.dataset.x = worldPos.x;
+                node.dataset.y = worldPos.y;
+                
+                // 直接设置CSS位置（避免再次通过worldToScreen计算，防止累积误差）
+                node.style.left = targetScreenX + 'px';
+                node.style.top = targetScreenY + 'px';
+                
+                drawConnections();
+                
+                // 检查是否在删除区域
+                const trashZone = document.getElementById('trash-zone');
+                if (moveEvent.clientY > window.innerHeight - 100) {
+                    trashZone.classList.add('active');
                 } else {
-                    // 清理拖拽状态
-                    node.classList.remove('dragging');
-                    nodeLayer.classList.remove('dragging-node');
-                    isDragging = false;
-                    dragNode = null;
-                    document.getElementById('trash-zone').classList.remove('active');
+                    trashZone.classList.remove('active');
                 }
-            };
-            
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
+            }
         }
+    };
+    
+    const onMouseUp = () => {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        
+        if (dragStarted) {
+            // 确保最终位置正确
+            const finalScreenX = dragNode ? parseFloat(dragNode.style.left) : 0;
+            const finalScreenY = dragNode ? parseFloat(dragNode.style.top) : 0;
+            
+            if (dragNode && finalScreenY > window.innerHeight - 100) {
+                // 删除节点逻辑
+                const nodeId = dragNode.id;
+                dragNode.remove();
+                nodes = nodes.filter(n => n.id !== nodeId);
+                connections = connections.filter(c => c.from !== nodeId && c.to !== nodeId);
+                selectedNodes = selectedNodes.filter(id => id !== nodeId);
+            } else {
+                // 将最终屏幕坐标转换回世界坐标并保存
+                const finalWorldPos = screenToWorld(finalScreenX, finalScreenY);
+                if (dragNode) {
+                    dragNode.dataset.x = finalWorldPos.x;
+                    dragNode.dataset.y = finalWorldPos.y;
+                    // 使用updateNodePosition确保位置正确（它会应用当前的scale和offset）
+                    updateNodePosition(dragNode, finalWorldPos.x, finalWorldPos.y);
+                }
+            }
+            
+            if (dragNode) {
+                dragNode.classList.remove('dragging');
+            }
+            nodeLayer.classList.remove('dragging-node');
+            isDragging = false;
+            dragNode = null;
+            document.getElementById('trash-zone').classList.remove('active');
+            drawConnections();
+            updateStats();
+        } else {
+            // 如果没有触发拖拽，执行点击逻辑
+            handleNodeClick(e);
+        }
+    };
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+}
 
         function handleNodeClick(e) {
-            if (isDragging) return;
             const node = e.currentTarget;
             const nodeId = node.id;
 
