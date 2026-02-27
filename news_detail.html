@@ -233,7 +233,7 @@
         .logo {
             font-family: "STXingkai", "Microsoft YaHei", sans-serif;
             font-size: 28px;
-            color: #333;
+            color: #ff0040;
             text-decoration: none;
             font-weight: 500;
         }
@@ -242,6 +242,42 @@
             display: flex;
             gap: 35px;
             font-size: 17px;
+        }
+
+                .nav li {
+            list-style: none;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .nav ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 8px 0;
+            min-width: 120px;
+            z-index: 1000;
+        }
+        
+        .nav li:hover ul {
+            display: block;
+        }
+        
+        .nav ul li {
+            padding: 5px 15px;
+            white-space: nowrap;
+        }
+        
+        .nav ul li:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .nav ul li a {
+            color: #333;
+            text-decoration: none;
         }
 
         .news-list li {
@@ -320,42 +356,43 @@
 <body>
     <div class="top">
         <div class="w1000">
-            <a class="logo" href="search.html" rel="noreferrer">澳港省日报</a>
+            <a class="logo" href="website1.html" rel="noreferrer">澳港省日报</a>
             <ul class="nav">
                 <li id="ribao">
                     日报
                     <ul class="ribao">
-                        <li><a href="http://paper.people.com.cn/paperindex.htm" target="_blank" rel="noreferrer">人民日报</a></li>
-                        <li><a href="http://paper.people.com.cn/rmrbhwb/paperindex.htm" target="_blank" rel="noreferrer">人民日报海外版</a></li>
-                        <li><a href="http://www.huanqiu.com/" target="_blank" rel="noreferrer">环球时报</a></li>
-                        <li><a href="http://epaper.stcn.com/" target="_blank" rel="noreferrer">证券时报</a></li>
+                        <li><a target="_blank" rel="noreferrer">人民日报</a></li>
+                        <li><a target="_blank" rel="noreferrer">人民日报海外版</a></li>
+                        <li><a href="graph.html" target="_blank" rel="noreferrer">环球时报</a></li>
+                        <li><a target="_blank" rel="noreferrer">证券时报</a></li>
                     </ul>
                 </li>
                 <li id="zhoubao">
                     周报
                     <ul class="zhoubao">
-                        <li><a href="http://paper.people.com.cn/gjjrb/paperindex.htm" target="_blank" rel="noreferrer">国际金融报</a></li>
-                        <li><a href="http://paper.people.com.cn/zgnyb/paperindex.htm" target="_blank" rel="noreferrer">中国能源报</a></li>
-                        <li><a href="http://paper.people.com.cn/jksb/paperindex.htm" target="_blank" rel="noreferrer">健康时报</a></li>
-                        <li><a href="http://paper.people.com.cn/fcyym/paperindex.htm" target="_blank" rel="noreferrer">讽刺与幽默</a></li>
-                        <li><a href="http://paper.people.com.cn/zgcsb/paperindex.htm" target="_blank" rel="noreferrer">中国城市报</a></li>
+                        <li><a target="_blank" rel="noreferrer">国际金融报</a></li>
+                        <li><a target="_blank" rel="noreferrer">中国能源报</a></li>
+                        <li><a target="_blank" rel="noreferrer">健康时报</a></li>
+                        <li><a target="_blank" rel="noreferrer">讽刺与幽默</a></li>
+                        <li><a target="_blank" rel="noreferrer">中国城市报</a></li>
                     </ul>
                 </li>
                 <li id="zazhi">
                     杂志
                     <ul class="zazhi">
-                        <li><a href="http://paper.people.com.cn/xwzx/paperindex.htm" target="_blank" rel="noreferrer">新闻战线</a></li>
-                        <li><a href="http://paper.people.com.cn/rmlt/paperindex.htm" target="_blank" rel="noreferrer">人民论坛</a></li>
-                        <li><a href="http://paper.people.com.cn/rmzk/paperindex.htm" target="_blank" rel="noreferrer">人民周刊</a></li>
-                        <li><a href="http://paper.people.com.cn/zgjjzk/paperindex.htm" target="_blank" rel="noreferrer">中国经济周刊</a></li>
-                        <li><a href="http://paper.people.com.cn/mszk/paperindex.htm" target="_blank" rel="noreferrer">民生周刊</a></li>
-                        <li><a href="https://www.gjrwls.com/" target="_blank" rel="noreferrer">国家人文历史</a></li>
-                        <li><a href="http://paper.people.com.cn/zgby/paperindex.htm" target="_blank" rel="noreferrer">中国报业</a></li>
+                        <li><a target="_blank" rel="noreferrer">新闻战线</a></li>
+                        <li><a target="_blank" rel="noreferrer">人民论坛</a></li>
+                        <li><a target="_blank" rel="noreferrer">人民周刊</a></li>
+                        <li><a target="_blank" rel="noreferrer">中国经济周刊</a></li>
+                        <li><a target="_blank" rel="noreferrer">民生周刊</a></li>
+                        <li><a target="_blank" rel="noreferrer">国家人文历史</a></li>
+                        <li><a target="_blank" rel="noreferrer">中国报业</a></li>
                     </ul>
                 </li>
             </ul>
         </div>
     </div>
+
 
     <div class="main w1000">
         <!-- 左侧：报纸图片 + 相关新闻 -->
@@ -864,3 +901,4 @@
     </script>
 </body>
 </html>
+
