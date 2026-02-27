@@ -4,17 +4,18 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>新闻详情</title>
+    <title>新闻详情 - 澳港省日报</title>
     <link rel="stylesheet" href="./fcyym.css" />
     <style>
-        /* 全局背景改为白色 */
+        /* 全局背景改为白色 - 与search2一致 */
         body {
             background-color: #ffffff !important;
             margin: 0;
             padding: 0;
+            font-family: 'SimSun', '宋体', 'Microsoft YaHei', sans-serif;
         }
 
-        /* 大幅加宽整体容器宽度 */
+        /* 大幅加宽整体容器宽度 - 与search2一致 */
         .w1000 {
             width: 1400px !important;
             margin: 0 auto;
@@ -35,6 +36,10 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            background: #fff;
+            border: 1px solid #e4e4e4;
+            padding: 20px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
         }
 
         /* 右侧内容区 */
@@ -43,6 +48,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            background: #fff;
+            border: 1px solid #e4e4e4;
+            padding: 28px 32px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            position: relative;
         }
 
         /* 调整报纸图片大小 */
@@ -76,7 +86,7 @@
             margin-bottom: 20px;
         }
 
-        /* 板块按钮样式 */
+        /* 板块按钮样式 - 使用search2的红色 */
         .swiper-slide {
             background-color: #d7000f;
             color: white;
@@ -112,10 +122,10 @@
             max-width: none !important;
             display: flex;
             flex-direction: column;
-            margin-top: -10px; /* 整体上移，抵消之前日期占用的空间 */
+            margin-top: -10px; /* 整体上移 */
         }
 
-        /* 操作按钮区域 */
+        /* 操作按钮区域 - 从search2的导航风格演化而来 */
         .art-btn {
             display: flex;
             justify-content: space-between;
@@ -127,6 +137,7 @@
             margin-bottom: 5px;
             margin-top: 0;
             border-radius: 4px 4px 0 0;
+            border: 1px solid #e4e4e4;
         }
 
         .art-btn span a, .art-btn a, .art-btn strong a {
@@ -136,13 +147,17 @@
             font-size: 15px;
         }
 
-        /* 文章内容容器 - 设置默认高度，内容超出时自动延伸 */
+        .art-btn a:hover {
+            color: #d7000f;
+        }
+
+        /* 文章内容容器 - 设置默认最小高度，内容超出时自动延伸 */
         .article {
             width: 100%;
             text-align: center;
             background-color: #ffffff;
             border-top: 1px solid #eee;
-            min-height: 400px; /* 设置默认最小高度 */
+            min-height: 600px; /* 设置默认最小高度 */
             height: auto; /* 高度自动，由内容撑开 */
         }
 
@@ -222,14 +237,23 @@
             display: none !important;
         }
 
-        /* 顶部导航 */
-        .top .w1000 {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
+        /* 顶部导航 - 与search2完全一致 */
+        .top {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        /* 行楷文字logo */
+        .top .w1000 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+
+        /* 行楷文字logo - 颜色改为search2的ff0040 */
         .logo {
             font-family: "STXingkai", "Microsoft YaHei", sans-serif;
             font-size: 28px;
@@ -242,9 +266,11 @@
             display: flex;
             gap: 35px;
             font-size: 17px;
+            position: relative;
         }
-
-                .nav li {
+        
+        /* 下拉菜单样式 */
+        .nav li {
             list-style: none;
             position: relative;
             cursor: pointer;
@@ -311,6 +337,8 @@
             font-size: 14px;
             color: #666;
             margin-top: -5px; /* 稍微上移，配合整体上移 */
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .search-hint strong {
@@ -334,17 +362,50 @@
 
         /* 移除日期容器 - 完全隐藏 */
         .date-box {
-            display: none !important; /* 彻底移除日期区域 */
+            display: none !important;
         }
 
         /* 板块网格上移，填补日期移除后的空间 */
         .swiper-box {
-            margin-top: -20px; /* 大幅上移，让板块按钮靠近顶部 */
+            margin-top: -20px;
             width: 100%;
         }
-    </style>
-    <!-- 引入在线行楷字体 -->
-    <style>
+
+        /* 底部样式 - 与search2一致 */
+        .bottom {
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            padding: 26px 0 40px;
+        }
+
+        /* 返回顶部 - 与search2一致 */
+        .go-top {
+            position: fixed;
+            right: 32px;
+            bottom: 48px;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+            overflow: hidden;
+            transition: transform 0.2s ease;
+            background: #fff;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .go-top:hover {
+            transform: translateY(-6px);
+        }
+
+        .go-top img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 引入在线行楷字体 */
         @font-face {
             font-family: 'STXingkai';
             src: url('https://fonts.gstatic.com/s/notosanssc/v24/k3k68XPNpWRmgQ73v60CSLpGF90me5j.woff2') format('woff2');
@@ -356,46 +417,46 @@
 <body>
     <div class="top">
         <div class="w1000">
-            <a class="logo" href="website1.html" rel="noreferrer">澳港省日报</a>
+            <!-- logo颜色改为ff0040，与search2一致 -->
+            <a class="logo" href="search.html" rel="noreferrer">澳港省日报</a>
             <ul class="nav">
                 <li id="ribao">
                     日报
                     <ul class="ribao">
-                        <li><a target="_blank" rel="noreferrer">人民日报</a></li>
-                        <li><a target="_blank" rel="noreferrer">人民日报海外版</a></li>
-                        <li><a href="graph.html" target="_blank" rel="noreferrer">环球时报</a></li>
-                        <li><a target="_blank" rel="noreferrer">证券时报</a></li>
+                        <li><a href="http://paper.people.com.cn/paperindex.htm" target="_blank" rel="noreferrer">人民日报</a></li>
+                        <li><a href="http://paper.people.com.cn/rmrbhwb/paperindex.htm" target="_blank" rel="noreferrer">人民日报海外版</a></li>
+                        <li><a href="http://www.huanqiu.com/" target="_blank" rel="noreferrer">环球时报</a></li>
+                        <li><a href="http://epaper.stcn.com/" target="_blank" rel="noreferrer">证券时报</a></li>
                     </ul>
                 </li>
                 <li id="zhoubao">
                     周报
                     <ul class="zhoubao">
-                        <li><a target="_blank" rel="noreferrer">国际金融报</a></li>
-                        <li><a target="_blank" rel="noreferrer">中国能源报</a></li>
-                        <li><a target="_blank" rel="noreferrer">健康时报</a></li>
-                        <li><a target="_blank" rel="noreferrer">讽刺与幽默</a></li>
-                        <li><a target="_blank" rel="noreferrer">中国城市报</a></li>
+                        <li><a href="http://paper.people.com.cn/gjjrb/paperindex.htm" target="_blank" rel="noreferrer">国际金融报</a></li>
+                        <li><a href="http://paper.people.com.cn/zgnyb/paperindex.htm" target="_blank" rel="noreferrer">中国能源报</a></li>
+                        <li><a href="http://paper.people.com.cn/jksb/paperindex.htm" target="_blank" rel="noreferrer">健康时报</a></li>
+                        <li><a href="http://paper.people.com.cn/fcyym/paperindex.htm" target="_blank" rel="noreferrer">讽刺与幽默</a></li>
+                        <li><a href="http://paper.people.com.cn/zgcsb/paperindex.htm" target="_blank" rel="noreferrer">中国城市报</a></li>
                     </ul>
                 </li>
                 <li id="zazhi">
                     杂志
                     <ul class="zazhi">
-                        <li><a target="_blank" rel="noreferrer">新闻战线</a></li>
-                        <li><a target="_blank" rel="noreferrer">人民论坛</a></li>
-                        <li><a target="_blank" rel="noreferrer">人民周刊</a></li>
-                        <li><a target="_blank" rel="noreferrer">中国经济周刊</a></li>
-                        <li><a target="_blank" rel="noreferrer">民生周刊</a></li>
-                        <li><a target="_blank" rel="noreferrer">国家人文历史</a></li>
-                        <li><a target="_blank" rel="noreferrer">中国报业</a></li>
+                        <li><a href="http://paper.people.com.cn/xwzx/paperindex.htm" target="_blank" rel="noreferrer">新闻战线</a></li>
+                        <li><a href="http://paper.people.com.cn/rmlt/paperindex.htm" target="_blank" rel="noreferrer">人民论坛</a></li>
+                        <li><a href="http://paper.people.com.cn/rmzk/paperindex.htm" target="_blank" rel="noreferrer">人民周刊</a></li>
+                        <li><a href="http://paper.people.com.cn/zgjjzk/paperindex.htm" target="_blank" rel="noreferrer">中国经济周刊</a></li>
+                        <li><a href="http://paper.people.com.cn/mszk/paperindex.htm" target="_blank" rel="noreferrer">民生周刊</a></li>
+                        <li><a href="https://www.gjrwls.com/" target="_blank" rel="noreferrer">国家人文历史</a></li>
+                        <li><a href="http://paper.people.com.cn/zgby/paperindex.htm" target="_blank" rel="noreferrer">中国报业</a></li>
                     </ul>
                 </li>
             </ul>
         </div>
     </div>
 
-
     <div class="main w1000">
-        <!-- 左侧：报纸图片 + 相关新闻 -->
+        <!-- 左侧：报纸图片 + 相关新闻 - 添加边框和阴影，与search2左侧栏一致 -->
         <div class="paper-box">
             <div class="paper">
                 <img id="paper-image" src="" alt="" width="400" height="575" />
@@ -426,9 +487,9 @@
                 </div>
             </div>
 
-            <!-- 文章区域 - 整体上移 -->
+            <!-- 文章区域 - 整体上移，按钮样式与search2导航协调 -->
             <div class="article-box">
-                <!-- 操作按钮区域 -->
+                <!-- 操作按钮区域 - 采用与search2导航协调的样式 -->
                 <div class="art-btn">
                     <span><a href="search.html">返回搜索</a></span>
                     <a class="big" href="#" data-action="zoom-in">放大</a>
@@ -816,18 +877,6 @@
             }
         }
 
-        // 获取星期几
-        function getWeekday(dateStr) {
-            if (!dateStr) return '';
-            try {
-                const date = new Date(dateStr.replace(/年|月/g, '-').replace(/日/g, ''));
-                const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                return weekdays[date.getDay()] || '';
-            } catch (e) {
-                return '';
-            }
-        }
-
         // 初始化
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('页面加载完成，开始初始化...');
@@ -901,4 +950,3 @@
     </script>
 </body>
 </html>
-
