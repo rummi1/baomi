@@ -22,7 +22,7 @@
             display: flex;
         }
 
-        /* 恢复左右并排布局 */
+        /* 恢复左右并排布局 - 与search2完全一致 */
         .main {
             display: flex;
             justify-content: space-between;
@@ -30,9 +30,9 @@
             padding: 0 20px;
         }
 
-        /* 左侧内容区 - 调整为显示相关新闻 */
+        /* 左侧内容区 - 宽度和样式与search2左侧栏完全一致 */
         .paper-box {
-            width: 15% !important;
+            width: 20% !important; /* 与search2左侧宽度一致 */
             display: flex;
             flex-direction: column;
             align-items: flex-start;
@@ -42,9 +42,9 @@
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
         }
 
-        /* 右侧内容区 */
+        /* 右侧内容区 - 宽度和样式与search2右侧思维导图容器完全一致 */
         .right-main {
-            width: 63% !important;
+            width: 75% !important; /* 与search2右侧宽度一致 */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -456,7 +456,7 @@
     </div>
 
     <div class="main w1000">
-        <!-- 左侧：报纸图片 + 相关新闻 - 添加边框和阴影，与search2左侧栏一致 -->
+        <!-- 左侧：报纸图片 + 相关新闻 - 宽度20%，与search2左侧栏完全一致 -->
         <div class="paper-box">
             <div class="paper">
                 <img id="paper-image" src="" alt="" width="400" height="575" />
@@ -473,6 +473,7 @@
             </div>
         </div>
 
+        <!-- 右侧：内容区域 - 宽度75%，与search2右侧思维导图容器完全一致 -->
         <div class="right-main">
             <!-- 日期容器已被完全隐藏，不再显示 -->
 
