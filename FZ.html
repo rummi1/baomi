@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纯净 · 双图一按钮</title>
+    <style>
+        /* 彻底清除所有默认边距，保证只有纯粹的画面 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* 满屏无滚动 */
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; /* 仅供按钮文字，不额外引入元素 */
+        }
+
+        /* 主容器：背景图片层 */
+        .background {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            /* 背景图片 — 选用宁静的远景 */
+            background-image: url('FZ1.png');
+            background-size: 55%;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* 没有任何叠加遮罩、文字、控件，纯粹背景 */
+        }
+
+        /* 悬浮的第二张图片 —— 没有任何边框、阴影、文字，只有图片本身 */
+        .floating-pic {
+            position: absolute;
+            /* 初始位置：稍微偏离中心，展现自然悬浮感 (可根据喜好微调，但完全无控制) */
+            left: 48vw;
+            top: 9.9vh;
+            /* 图片原始比例，不加任何修饰 */
+            width: 150px;          /* 固定舒适尺寸，无边框无圆角 */
+            height: auto;
+            /* 连阴影都没有，只有纯粹的图片内容 */
+            object-fit: contain;
+            /* 保证图片在背景之上 */
+            z-index: 10;
+            /* 没有任何额外的装饰边框或背景 */
+            background-color: white; 
+        }
+
+        /* 返回按钮 —— 唯一可交互元素，极简设计，只有功能 */
+        .back-button {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            background-color: rgba(0, 0, 0, 0.7);   /* 半透明不抢眼 */
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 12px 40px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            border-radius: 50px;    /* 轻微圆角，但保持简洁 */
+            letter-spacing: 1px;
+            cursor: pointer;
+            /* 无阴影、无动画、无额外装饰 */
+            transition: none;
+            /* 保证不出现任何额外文字或图标，只有“返回” */
+            line-height: 1.2;
+            font-family: inherit;
+        }
+
+        /* 悬停效果只做最微小的变化，避免画蛇添足 */
+        .back-button:hover {
+            background-color: rgba(40, 40, 55, 0.8);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        
+        .floating-pic {
+            pointer-events: none; 
+        }
+
+        /* 针对极小屏幕简单调整悬浮图片大小，但保持纯粹 */
+        @media (max-width: 600px) {
+            .floating-pic {
+                width: 200px;
+                left: 8vw;
+                top: 12vh;
+            }
+            .back-button {
+                padding: 10px 30px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <!-- 悬浮的第二张图片 —— 独立存在，不加任何文字或框 -->
+        <img src="image.png" 
+             alt=" "               
+             class="floating-pic"
+             aria-hidden="true">    <!-- 辅助技术隐藏，保持视觉纯粹，仅作装饰图片 -->
+
+        <!-- 底部返回按钮：唯一功能，返回 website1 -->
+        <button class="back-button" id="returnButton">返回</button>
+    </div>
+
+    <script>
+        (function() {
+            const backBtn = document.getElementById('returnButton');
+            
+            backBtn.addEventListener('click', function() {
+
+                        // 使用 replace 避免生成额外历史记录
+                    window.location.replace('website1.html');  
+
+            });
+        })();
+    </script>
+
+</body>
+</html>
