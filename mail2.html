@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inlook 邮箱 · 外部访客模式（内容区提示）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        outlook: {
+                            blue: '#0078d4',
+                            'blue-dark': '#106ebe',
+                            'blue-light': '#2b88d8',
+                            'blue-hover': '#005a9e',
+                        },
+                        primary: '#0078d4',
+                        dark: '#111111',
+                        light: '#f1efe8',
+                        'light-secondary': '#e5e2d9',
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', '"SF Pro Text"', '"Source Han Sans"', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        body { background-color: #f1efe8; }
+        .geometric-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .geo-line { position: absolute; background: rgba(17, 17, 17, 0.03); }
+        .geo-line.horizontal { width: 100%; height: 1px; }
+        .geo-line.vertical { width: 1px; height: 100%; }
+        .geo-circle { position: absolute; border: 1px solid rgba(17, 17, 17, 0.03); border-radius: 50%; width: 20px; height: 20px; }
+        .geo-square { position: absolute; border: 1px solid rgba(17, 17, 17, 0.03); width: 16px; height: 16px; }
+        .outlook-card { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.1); }
+        .view-section { display: none !important; width: 100%; height: 100%; flex-shrink: 0; }
+        .view-section.active { display: flex !important; flex-direction: column; }
+        .view-section.drive-view.active, .view-section.contacts-view.active { display: block !important; }
+        .mail-item { border-bottom: 1px solid #e5e2d9; transition: all 0.2s ease; cursor: pointer; }
+        .mail-item:hover { background-color: #e5e2d9; }
+        .rail-item { transition: all 0.2s ease; cursor: pointer; }
+        .rail-item:hover { background-color: rgba(0, 120, 212, 0.1); }
+        .rail-item.active { background-color: rgba(0, 120, 212, 0.15); border-left: 3px solid #0078d4; }
+        .folder-item { transition: all 0.2s ease; cursor: pointer; }
+        .folder-item:hover { background-color: #e5e2d9; }
+        .folder-item.active { background-color: #0078d4; color: white; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal.open { display: flex; }
+        .modal__content { background: white; border: 1px solid #111111; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal__header { padding: 16px; border-bottom: 1px solid #e5e2d9; display: flex; justify-content: space-between; align-items: center; background: #f1efe8; }
+        .modal__body { padding: 20px; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #111111; color: white; padding: 12px 20px; border-radius: 4px; z-index: 200; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .contact-card { background: white; border: 1px solid #111111; border-radius: 4px; padding: 16px; margin-bottom: 12px; }
+        .contact-name { font-size: 15px; font-weight: 700; }
+        .contact-mail { font-size: 12px; color: #666; font-family: monospace; }
+        .disabled-content-placeholder { text-align: center; padding: 40px 20px; color: #6c757d; background: #f8f9fa; border: 2px dashed #ccc; border-radius: 8px; margin: 20px; }
+        .disabled-content-placeholder i { font-size: 48px; color: #adb5bd; margin-bottom: 16px; display: block; }
+        .disabled-content-placeholder p { font-size: 16px; font-weight: 500; }
+        .disabled-content-placeholder small { font-size: 13px; color: #999; }
+        .archive-unlock-badge { background: #28a745; color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px; margin-left: 8px; }
+    </style>
+</head>
+<body class="bg-[#f1efe8] min-h-screen font-sans text-[#111111] overflow-x-hidden relative">
+
+    <div class="geometric-container">
+        <div class="geo-line horizontal" style="top: 12%;"></div><div class="geo-line horizontal" style="top: 35%;"></div>
+        <div class="geo-line horizontal" style="top: 62%;"></div><div class="geo-line horizontal" style="top: 88%;"></div>
+        <div class="geo-line vertical" style="left: 8%;"></div><div class="geo-line vertical" style="left: 25%;"></div>
+        <div class="geo-line vertical" style="left: 75%;"></div><div class="geo-line vertical" style="left: 92%;"></div>
+        <div class="geo-circle" style="top: 6%; left: 12%;"></div><div class="geo-circle" style="top: 28%; left: 88%;"></div>
+        <div class="geo-circle" style="top: 55%; left: 18%;"></div><div class="geo-circle" style="top: 82%; left: 82%;"></div>
+        <div class="geo-square" style="top: 15%; left: 45%;"></div><div class="geo-square" style="top: 42%; left: 62%;"></div>
+        <div class="geo-square" style="top: 68%; left: 35%;"></div><div class="geo-square" style="top: 90%; left: 55%;"></div>
+    </div>
+
+    <!-- 顶部状态栏 -->
+    <div class="bg-white border-b border-[#111111] px-4 py-2 flex items-center justify-between relative z-10">
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 rounded-full bg-[#0078d4] animate-pulse"></div>
+                <span class="text-sm text-[#111111]">连接正常 · 访客模式</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4 text-sm">
+            <span id="current-time" class="font-medium text-[#111111]"></span>
+            <span class="text-gray-500">© 2026 工作邮箱系统 · 外部访问受限</span>
+        </div>
+    </div>
+
+    <div class="flex min-h-[calc(100vh-40px)] relative z-10">
+        <!-- 左侧导航栏 (按钮可点击) -->
+        <nav class="w-16 bg-white border-r border-[#111111] flex flex-col items-center py-4 space-y-4" aria-label="主导航">
+            <div class="w-10 h-10 rounded bg-[#0078d4] flex items-center justify-center text-white text-xl font-bold mb-2">O</div>
+            <a class="rail-item active w-full py-3 flex flex-col items-center text-[#111111]" href="#" data-target="mail" aria-current="page">
+                <svg class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6.75A2.75 2.75 0 0 1 5.75 4h12.5A2.75 2.75 0 0 1 21 6.75v10.5A2.75 2.75 0 0 1 18.25 20H5.75A2.75 2.75 0 0 1 3 17.25Zm2-.75a.75.75 0 0 0-.75.75V8l7.42 4.64a1.75 1.75 0 0 0 1.86 0L21.75 8V6.75a.75.75 0 0 0-.75-.75Z"/></svg>
+                <span class="text-xs">邮件</span>
+            </a>
+            <a class="rail-item w-full py-3 flex flex-col items-center text-[#111111]" href="#" data-target="drive">
+                <svg class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor"><path d="M4 7.75A2.75 2.75 0 0 1 6.75 5h10.5A2.75 2.75 0 0 1 20 7.75v8.5A2.75 2.75 0 0 1 17.25 19H6.75A2.75 2.75 0 0 1 4 16.25Zm2.75-.75a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h10.5a.75.75 0 0 0 .75-.75V7.75a.75.75 0 0 0-.75-.75ZM7.5 8.5h9v1.5h-9Zm0 3h5v1.5h-5Z"/></svg>
+                <span class="text-xs">云盘</span>
+            </a>
+            <a class="rail-item w-full py-3 flex flex-col items-center text-[#111111]" href="#" data-target="contacts">
+                <svg class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a4.25 4.25 0 1 1 0 8.5 4.25 4.25 0 0 1 0-8.5Zm0 10c3.33 0 6.62 1.46 7.88 3.94a1.75 1.75 0 0 1-1.56 2.56H5.68a1.75 1.75 0 0 1-1.56-2.56C5.38 13.46 8.67 12 12 12Z"/></svg>
+                <span class="text-xs">联系人</span>
+            </a>
+            <a class="rail-item w-full py-3 flex flex-col items-center text-[#111111]" href="#">
+                <svg class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor"><path d="M5.25 4h13.5A1.75 1.75 0 0 1 20.5 5.75v12.5A1.75 1.75 0 0 1 18.75 20H5.25A1.75 1.75 0 0 1 3.5 18.25V5.75A1.75 1.75 0 0 1 5.25 4ZM12 5.5 5 18.5h14Z"/></svg>
+                <span class="text-xs">日历</span>
+            </a>
+        </nav>
+
+        <div class="flex-1 flex flex-col min-w-0 bg-[#f1efe8]" id="app">
+            <!-- 邮件视图 (默认激活) -->
+            <section class="view-section mail-view active" data-view="mail">
+                <!-- 命令栏 (所有按钮可点击，但不会改变内容区) -->
+                <header class="bg-white border-b border-[#111111] px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <span class="bg-[#0078d4] text-white px-3 py-1 rounded text-sm font-medium">Inlook</span>
+                        <nav class="flex space-x-2">
+                            <button class="px-3 py-1.5 text-sm font-medium text-white bg-[#0078d4] rounded transition-colors" id="homeBtn">主页</button>
+                            <button class="px-3 py-1.5 text-sm font-medium text-[#111111] hover:bg-[#e5e2d9] rounded transition-colors">日历</button>
+                            <button class="px-3 py-1.5 text-sm font-medium text-[#111111] hover:bg-[#e5e2d9] rounded transition-colors">待办</button>
+                            <button class="px-3 py-1.5 text-sm font-medium text-[#111111] hover:bg-[#e5e2d9] rounded transition-colors">帮助</button>
+                        </nav>
+                    </div>
+                    <div class="flex items-center bg-[#f1efe8] border border-[#8a8886] rounded px-3 py-1.5 w-64">
+                        <svg class="w-4 h-4 text-gray-500 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 3a7.5 7.5 0 0 1 5.996 12.003l3.25 3.25-1.06 1.06-3.25-3.25A7.5 7.5 0 1 1 10.5 3Zm0 1.5a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z"/></svg>
+                        <input type="search" placeholder="搜索" class="bg-transparent border-none outline-none text-sm w-full" />
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0-3a1.5 1.5 0 0 1 1.47 1.18l.14.55a1.5 1.5 0 0 0 1.61 1.11l.56-.06a1.5 1.5 0 0 1 1.54.87l.24.51a1.5 1.5 0 0 1-.32 1.71l-.4.4a1.5 1.5 0 0 0 0 2.12l.4.4a1.5 1.5 0 0 1 .32 1.71l-.24.51a1.5 1.5 0 0 1-1.54.87l-.56-.06a1.5 1.5 0 0 0-1.61 1.11l-.14.55A1.5 1.5 0 0 1 12 19.5h-.5a1.5 1.5 0 0 1-1.47-1.18l-.14-.55a1.5 1.5 0 0 0-1.61-1.11l-.56.06a1.5 1.5 0 0 1-1.54-.87l-.24-.51a1.5 1.5 0 0 1 .32-1.71l.4-.4a1.5 1.5 0 0 0 0-2.12l-.4-.4a1.5 1.5 0 0 1-.32-1.71l.24-.51a1.5 1.5 0 0 1 1.54-.87l.56.06a1.5 1.5 0 0 0 1.61-1.11l.14-.55A1.5 1.5 0 0 1 11.5 4.5Z"/></svg></button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 3a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm0 10c3.33 0 6.62 1.46 7.88 3.94a1.75 1.75 0 0 1-1.56 2.56H5.68a1.75 1.75 0 0 1-1.56-2.56C5.38 13.46 8.67 12 12 12Z"/></svg></button>
+                        <div class="w-8 h-8 rounded-full bg-[#0078d4] text-white flex items-center justify-center text-sm font-medium cursor-pointer">林</div>
+                    </div>
+                </header>
+
+                <div class="flex flex-1 min-h-0">
+                    <!-- 文件夹面板 (所有文件夹可点击，包括归档) -->
+                    <aside class="w-56 bg-white border-r border-[#111111] flex flex-col">
+                        <div class="p-4 border-b border-[#e5e2d9]">
+                            <h2 class="text-lg font-semibold text-[#111111]">收件箱</h2>
+                            <a class="text-sm text-[#0078d4] hover:underline mt-1 inline-block" href="#" id="manageFolders">管理文件夹</a>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-2">
+                            <section class="mb-4">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">收藏</h3>
+                                <div class="space-y-1">
+                                    <a class="folder-item flex items-center justify-between px-3 py-2 rounded text-sm" href="#" data-folder="inbox" id="folderInbox">
+                                        <span>收件箱</span><span class="bg-[#0078d4] text-white text-xs px-2 py-0.5 rounded-full">233</span>
+                                    </a>
+                                    <a class="folder-item flex items-center justify-between px-3 py-2 rounded text-sm" href="#" data-folder="sent">
+                                        <span>已发送邮件</span>
+                                    </a>
+                                    <a class="folder-item flex items-center justify-between px-3 py-2 rounded text-sm" href="#" data-folder="drafts">
+                                        <span>草稿箱</span>
+                                    </a>
+                                </div>
+                            </section>
+                            <section class="mb-4">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">文件夹</h3>
+                                <div class="space-y-1">
+                                    <!-- 归档文件夹 (唯一能显示真实内容的) -->
+                                    <a class="folder-item active flex items-center px-3 py-2 rounded text-sm" href="#" data-folder="archive" id="archiveFolder">
+                                        <span>归档 </span>
+                                    </a>
+                                    <a class="folder-item flex items-center justify-between px-3 py-2 rounded text-sm" href="#" data-folder="spam">
+                                        <span>垃圾邮件</span><span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">44</span>
+                                    </a>
+                                    <a class="folder-item flex items-center px-3 py-2 rounded text-sm" href="#">已删除邮件</a>
+                                    <a class="folder-item flex items-center px-3 py-2 rounded text-sm" href="#">发现</a>
+                                </div>
+                            </section>
+                        </div>
+                    </aside>
+
+                    <!-- 邮件列表区 (默认展示禁止访问，除非点击归档) -->
+                    <section class="w-80 bg-white border-r border-[#111111] flex flex-col">
+                        <div class="p-3 border-b border-[#e5e2d9] flex items-center justify-between">
+                            <button class="outlook-btn-primary px-4 py-2 rounded text-sm font-medium flex items-center" id="newMailButton"><i class="fa fa-plus mr-2"></i>新邮件</button>
+                            <div class="flex space-x-1">
+                                <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors" id="syncMailButton"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10a8 8 0 0 1 14.11-4.47l1.83-1.83v6h-6l2.08-2.08A5.5 5.5 0 1 0 17 13h2.05A7.5 7.5 0 1 1 4 10Z"/></svg></button>
+                                <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9] transition-colors"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4.75 5h14.5a.75.75 0 0 1 .58 1.23l-5.58 7.26v4.51a1 1 0 0 1-1.52.85l-2.5-1.6a1 1 0 0 1-.48-.86v-2.9L4.17 6.23A.75.75 0 0 1 4.75 5Z"/></svg></button>
+                            </div>
+                        </div>
+                        <div class="flex border-b border-[#e5e2d9]">
+                            <button class="flex-1 py-2 text-sm font-medium text-[#0078d4] border-b-2 border-[#0078d4]">重点</button>
+                            <button class="flex-1 py-2 text-sm font-medium text-gray-500 hover:text-[#111111]">其他</button>
+                            <div class="flex items-center px-3 text-xs text-gray-500"><span>排序：最新优先</span><svg class="w-3 h-3 ml-1" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10h10l-5-5Z"/></svg></div>
+                        </div>
+                        <!-- 邮件列表容器 (动态替换内容) -->
+                        <div class="flex-1 overflow-y-auto mail-items" id="mailListContainer"></div>
+                    </section>
+
+                    <!-- 阅读窗格 (动态替换内容) -->
+                    <section class="flex-1 bg-white flex flex-col" id="readingPane">
+                        <header class="p-4 border-b border-[#e5e2d9]">
+                            <p class="reading-meta text-sm text-gray-600 mb-1" id="readingMeta"></p>
+                            <h1 class="reading-title text-xl font-semibold text-[#111111] mb-3" id="readingTitle"></h1>
+                            <div class="flex space-x-2">
+                                <button class="px-4 py-1.5 bg-[#0078d4] text-white rounded text-sm font-medium hover:bg-[#106ebe] transition-colors" id="replyBtn">回复</button>
+                                <button class="px-4 py-1.5 bg-[#f1efe8] text-[#111111] border border-[#8a8886] rounded text-sm font-medium hover:bg-[#e5e2d9] transition-colors" id="forwardBtn">转发</button>
+                                <button class="px-4 py-1.5 bg-[#f1efe8] text-[#111111] border border-[#8a8886] rounded text-sm font-medium hover:bg-[#e5e2d9] transition-colors">标记/分类</button>
+                            </div>
+                        </header>
+                        <div class="reading-body flex-1 overflow-y-auto p-6 text-sm leading-relaxed" id="readingBody"></div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- 云盘视图 (内容区永远显示禁止访问) -->
+            <section class="view-section drive-view" data-view="drive">
+                <header class="bg-white border-b border-[#111111] px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <span class="bg-[#0078d4] text-white px-3 py-1 rounded text-sm font-medium">云盘</span>
+                        <span class="text-sm font-medium text-[#111111]">所有文件</span>
+                    </div>
+                    <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9]" id="refreshDrive"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10a8 8 0 0 1 14.11-4.47l1.83-1.83v6h-6l2.08-2.08A5.5 5.5 0 1 0 17 13h2.05A7.5 7.5 0 1 1 4 10Z"/></svg></button>
+                </header>
+                <div class="p-6" id="driveContent">
+                    <!-- 静态禁止占位 -->
+                    <div class="disabled-content-placeholder">
+                        <i class="fa fa-lock"></i>
+                        <p>当前禁止外部人员访问</p>
+                        <small>您需要内部权限才能查看云盘内容</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 联系人视图 (内容区永远显示禁止访问) -->
+            <section class="view-section contacts-view" data-view="contacts">
+                <header class="bg-white border-b border-[#111111] px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <span class="bg-[#0078d4] text-white px-3 py-1 rounded text-sm font-medium">联系人</span>
+                        <span class="text-sm font-medium text-[#111111]">我的网络</span>
+                    </div>
+                    <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-[#e5e2d9]"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5a7 7 0 1 1 0 14 7 7 0 0 1 0-14Zm0 1.5A5.5 5.5 0 1 0 12 17 5.5 5.5 0 0 0 12 6.5Zm-.75 2h1.5v2.25H15v1.5h-2.25V14.5h-1.5v-2.25H9v-1.5h2.25Z"/></svg></button>
+                </header>
+                <div class="p-6" id="contactsContent">
+                    <div class="disabled-content-placeholder">
+                        <i class="fa fa-address-book"></i>
+                        <p>当前禁止外部人员访问</p>
+                        <small>联系人信息已隐藏</small>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 模态框 (用于展示归档邮件内图片或密码，仅归档触发) -->
+    <div class="modal" id="composeModal" role="dialog" aria-hidden="true">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 class="text-lg font-semibold" id="modalTitle">归档备份信息</h3>
+                <button class="text-gray-500 hover:text-[#111111]" data-modal-close><i class="fa fa-times text-xl"></i></button>
+            </div>
+            <div class="modal__body" id="modalBody">
+                <!-- 动态填充 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- 模板：归档邮件专用 (只有一封) -->
+    <template id="archiveMailTemplate">
+        <article class="mail-item p-3 cursor-pointer" data-id="archive-001">
+            <div class="flex items-start space-x-3">
+                <span class="item-avatar w-10 h-10 rounded-full bg-[#0078d4] text-white flex items-center justify-center text-sm font-medium">系</span>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="item-sender text-sm font-medium text-[#111111]">系统管理员</span>
+                        <time class="item-time text-xs text-gray-500">09:30</time>
+                    </div>
+                    <div class="item-subject text-sm text-[#111111] truncate mb-1">【归档】所有材料备份说明及密码</div>
+                    <p class="item-preview text-xs text-gray-500 truncate">所有材料都会备一份到云盘，备份密码详见正文...</p>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <script>
+        (function() {
+            // 实时时钟
+            function updateDateTime() {
+                const now = new Date();
+                const weekDays = ['日','一','二','三','四','五','六'];
+                const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+                const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${weekDays[now.getDay()]}`;
+                document.getElementById('current-time') && (document.getElementById('current-time').textContent = `${dateStr} ${timeStr}`);
+            }
+            updateDateTime(); setInterval(updateDateTime,1000);
+
+            // DOM 元素
+            const navItems = document.querySelectorAll('.rail-item');
+            const viewSections = document.querySelectorAll('.view-section');
+            const folderItems = document.querySelectorAll('.folder-item');
+            const mailListContainer = document.getElementById('mailListContainer');
+            const readingMeta = document.getElementById('readingMeta');
+            const readingTitle = document.getElementById('readingTitle');
+            const readingBody = document.getElementById('readingBody');
+            const modal = document.getElementById('composeModal');
+            const modalBody = document.getElementById('modalBody');
+            const modalTitle = document.getElementById('modalTitle');
+            const toast = document.getElementById('toast');
+            const archiveFolder = document.getElementById('archiveFolder');
+
+            // 状态：当前是否显示归档内容
+            let showingArchive = false; // 初始为邮件视图，但内容区显示禁止
+
+            // 工具函数
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2500);
+            }
+
+            // 渲染禁止占位 (邮件列表)
+            function renderDisabledMailList() {
+                mailListContainer.innerHTML = `
+                    <div class="disabled-content-placeholder" style="margin:20px;">
+                        <i class="fa fa-ban"></i>
+                        <p>当前禁止外部人员访问</p>
+                        <small>请使用内部网络查看邮件</small>
+                    </div>
+                `;
+            }
+
+            // 渲染禁止阅读窗格
+            function renderDisabledReadingPane() {
+                readingMeta.textContent = '';
+                readingTitle.textContent = '无权限访问';
+                readingBody.innerHTML = '<div class="disabled-content-placeholder"><i class="fa fa-lock"></i><p>当前禁止外部人员访问</p><small>您没有查看邮件内容的权限</small></div>';
+            }
+
+            // 渲染真实的归档邮件列表 (只有一封)
+            function renderArchiveMailList() {
+                mailListContainer.innerHTML = '';
+                const template = document.getElementById('archiveMailTemplate');
+                const clone = template.content.cloneNode(true);
+                const article = clone.querySelector('article');
+                article.addEventListener('click', () => {
+                    // 显示归档邮件真实内容
+                    readingMeta.innerHTML = '系统管理员 · <span style="color:#0078d4;">admin@inlook.com</span>';
+                    readingTitle.textContent = '【归档】所有材料备份说明及密码';
+                    readingBody.innerHTML = `
+                        <p>所有工作上的相关材料均要备份至安全云盘！</p>
+                        <p>附备份目录及密钥截图：（该页面无法得到真的图片）</p>
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'/>
+                        
+                        <p style="margin-top:15px;"><button class="px-3 py-1 bg-[#0078d4] text-white rounded" id="showPasswordModal">查看大图</button></p>
+                    `;
+                    // 绑定模态框事件
+                    document.getElementById('showPasswordModal')?.addEventListener('click', () => {
+                        modalTitle.textContent = '备份密码与目录';
+                        modalBody.innerHTML = `
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='300'/>
+                            <p class="text-sm text-gray-600 mt-4">请妥善保管密码，该密码仅限内部调查使用。</p>
+                        `;
+                        modal.classList.add('open');
+                        modal.setAttribute('aria-hidden', 'false');
+                    });
+                });
+                mailListContainer.appendChild(clone);
+            }
+
+            // 关闭模态
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal || e.target.closest('[data-modal-close]')) {
+                    modal.classList.remove('open');
+                    modal.setAttribute('aria-hidden', 'true');
+                }
+            });
+
+            // 视图切换 (所有按钮可点击，但内容区相应改变)
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = item.dataset.target;
+                    if (!target) return;
+                    // 更新激活样式
+                    navItems.forEach(n => n.classList.remove('active'));
+                    item.classList.add('active');
+                    viewSections.forEach(s => s.classList.remove('active'));
+                    const activeSection = document.querySelector(`.view-section[data-view="${target}"]`);
+                    if (activeSection) activeSection.classList.add('active');
+
+                    // 如果切换到邮件视图，根据是否归档显示内容
+                    if (target === 'mail') {
+                        if (showingArchive) {
+                            renderArchiveMailList();
+                            // 阅读窗格保留上一次的，如果之前打开过归档邮件则保留，否则重置
+                            if (!readingTitle.textContent.includes('备份')) {
+                                renderDisabledReadingPane(); // 保险
+                            }
+                        } else {
+                            renderDisabledMailList();
+                            renderDisabledReadingPane();
+                        }
+                    }
+                    // 其他视图本身已经有静态禁止占位，无需额外操作
+                });
+            });
+
+            // 文件夹点击 (全部可点击，只有归档会改变邮件列表)
+            folderItems.forEach(folder => {
+                folder.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const folderName = folder.dataset.folder;
+                    // 高亮
+                    folderItems.forEach(f => f.classList.remove('active'));
+                    folder.classList.add('active');
+
+                    if (folderName === 'archive') {
+                        showingArchive = true;
+                        // 切换到邮件视图 (如果不在邮件视图)
+                        const mailView = document.querySelector('.view-section[data-view="mail"]');
+                        if (!mailView.classList.contains('active')) {
+                            // 触发导航点击
+                            document.querySelector('.rail-item[data-target="mail"]').click();
+                        } else {
+                            // 直接更新邮件列表
+                            renderArchiveMailList();
+                            // 阅读窗格显示第一封(归档邮件)，但尚未点击邮件，所以暂时显示禁止或提示
+                            if (!readingTitle.textContent.includes('备份')) {
+                                renderDisabledReadingPane();
+                            }
+                        }
+                        // 确保邮件列表重新渲染
+                        renderArchiveMailList();
+                        showToast('📂 已进入归档文件夹，可查看备份邮件');
+                    } else {
+                        showingArchive = false;
+                        // 如果当前是邮件视图，更新为禁止
+                        if (document.querySelector('.view-section[data-view="mail"]').classList.contains('active')) {
+                            renderDisabledMailList();
+                            renderDisabledReadingPane();
+                        }
+                        showToast('🚫 当前禁止外部人员访问');
+                    }
+                });
+            });
+
+            // 其他所有按钮点击显示toast (除了归档相关的操作)
+            document.querySelectorAll('button, a').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    // 允许归档文件夹、归档邮件内的按钮、模态关闭按钮
+                    if (el.closest('#archiveFolder') || el.closest('.mail-item') || el.closest('[data-modal-close]') || el.id === 'showPasswordModal' || el.closest('.modal')) {
+                        return; // 放行
+                    }
+                    // 防止重复触发
+                    if (el.classList.contains('no-toast')) return;
+                    // 阻止默认并显示toast
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showToast('🚫 当前禁止外部人员访问');
+                }, { capture: true }); // 使用捕获确保优先
+            });
+
+            // 初始化：邮件视图显示禁止，但允许点击归档
+            renderDisabledMailList();
+            renderDisabledReadingPane();
+
+            // 云盘刷新按钮显示toast
+            document.getElementById('refreshDrive')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                showToast('🚫 当前禁止外部人员访问');
+            });
+
+            // 新邮件、同步等
+            document.getElementById('newMailButton')?.addEventListener('click', (e) => { e.preventDefault(); showToast('🚫 当前禁止外部人员访问'); });
+            document.getElementById('syncMailButton')?.addEventListener('click', (e) => { e.preventDefault(); showToast('🚫 当前禁止外部人员访问'); });
+            document.getElementById('replyBtn')?.addEventListener('click', (e) => { e.preventDefault(); showToast('🚫 当前禁止外部人员访问'); });
+            document.getElementById('forwardBtn')?.addEventListener('click', (e) => { e.preventDefault(); showToast('🚫 当前禁止外部人员访问'); });
+            document.getElementById('manageFolders')?.addEventListener('click', (e) => { e.preventDefault(); showToast('🚫 当前禁止外部人员访问'); });
+
+            // 归档文件夹默认激活样式 (便于识别)
+            archiveFolder.classList.add('active');
+            showingArchive = true; // 让一开始就能看到归档内容？但初始视图是邮件，我们想让用户点击归档才显示。所以初始不渲染归档，但高亮归档
+            archiveFolder.classList.remove('active'); // 取消高亮，让收件箱高亮? 默认第一个文件夹是收件箱高亮，我们保留。
+            document.querySelector('.folder-item[data-folder="inbox"]').classList.add('active');
+            showingArchive = false;
+        })();
+    </script>
+</body>
+</html>
