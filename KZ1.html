@@ -1,29 +1,468 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>南山市网信办 - 网页快照取证报告</title>
     <style>
-        body { font-family: 'Microsoft YaHei', sans-serif; margin: 30px; background: #f5f5f5; }
-        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
-        .report { background: white; padding: 25px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .snapshot { border: 1px solid #ddd; margin: 20px 0; padding: 15px; background: #fafafa; }
-        .time { color: #e74c3c; font-weight: bold; font-size: 18px; }
-        .diff { background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background: #34495e; color: white; }
-        .highlight { background: #f8d7da; color: #721c24; padding: 2px 5px; border-radius: 3px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Microsoft YaHei', sans-serif; 
+            margin: 30px; 
+            background: #f1efe8;
+            color: #111;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 几何装饰背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            background-image: 
+                linear-gradient(90deg, #111 1px, transparent 1px),
+                linear-gradient(180deg, #111 1px, transparent 1px);
+            background-size: 100px 100px;
+            opacity: 0.05;
+        }
+        
+        /* 装饰圆形 */
+        .deco-circle {
+            position: fixed;
+            border: 2px solid #111;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .deco-circle-1 {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            right: 5%;
+            opacity: 0.1;
+        }
+        
+        .deco-circle-2 {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 3%;
+            opacity: 0.15;
+        }
+        
+        /* 装饰方块 */
+        .deco-square {
+            position: fixed;
+            border: 2px solid #4a8c2d;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .deco-square-1 {
+            width: 60px;
+            height: 60px;
+            top: 30%;
+            left: 8%;
+            transform: rotate(15deg);
+            opacity: 0.2;
+        }
+        
+        .deco-square-2 {
+            width: 40px;
+            height: 40px;
+            bottom: 40%;
+            right: 10%;
+            transform: rotate(-10deg);
+            opacity: 0.15;
+        }
+        
+        /* 装饰线条 */
+        .deco-line {
+            position: fixed;
+            background: #111;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .deco-line-1 {
+            width: 1px;
+            height: 300px;
+            top: 5%;
+            left: 15%;
+            opacity: 0.1;
+        }
+        
+        .deco-line-2 {
+            width: 200px;
+            height: 1px;
+            bottom: 30%;
+            right: 5%;
+            opacity: 0.1;
+        }
+        
+        .header { 
+            background: #f1efe8; 
+            color: #111; 
+            padding: 20px; 
+            border: 2px solid #111;
+            border-bottom: none;
+            position: relative;
+            letter-spacing: -0.02em;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #4a8c2d;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            padding-left: 16px;
+        }
+        
+        .header p {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding-left: 16px;
+            color: #555;
+        }
+        
+        .report { 
+            background: #f1efe8; 
+            padding: 25px; 
+            border: 2px solid #111;
+            position: relative;
+        }
+        
+        .report h2 {
+            font-size: 18px;
+            letter-spacing: -0.02em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #111;
+            position: relative;
+            padding-left: 16px;
+        }
+        
+        .report h2::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #4a8c2d;
+        }
+        
+        .report > p {
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+        
+        .snapshot { 
+            border: 2px solid #111; 
+            margin: 20px 0; 
+            padding: 0; 
+            background: #f1efe8;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .snapshot:hover {
+            transform: translateX(4px);
+            box-shadow: -4px 4px 0 #4a8c2d;
+        }
+        
+        .snapshot::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #4a8c2d;
+            z-index: 1;
+        }
+        
+        .time { 
+            color: #111; 
+            font-weight: 700; 
+            font-size: 12px; 
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 15px 20px 15px 24px;
+            background: #111;
+            color: #f1efe8;
+            border-bottom: 2px solid #111;
+            position: relative;
+        }
+        
+        .time::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #4a8c2d;
+        }
+        
+        .snapshot h3 {
+            font-size: 14px;
+            padding: 15px 20px 0 24px;
+            letter-spacing: -0.01em;
+            font-weight: 600;
+        }
+        
+        .snapshot > p {
+            padding: 0 20px 0 24px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #555;
+            margin-top: 15px;
+        }
+        
+        .snapshot pre {
+            margin: 10px 20px 20px 24px;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #111;
+            font-size: 12px;
+            line-height: 1.5;
+            font-family: 'Courier New', monospace;
+            letter-spacing: -0.01em;
+        }
+        
+        table { 
+            width: calc(100% - 44px); 
+            border-collapse: collapse; 
+            margin: 15px 20px 20px 24px; 
+            font-size: 12px;
+        }
+        
+        th, td { 
+            border: 1px solid #111; 
+            padding: 12px; 
+            text-align: left; 
+            letter-spacing: -0.01em;
+        }
+        
+        th { 
+            background: #111; 
+            color: #f1efe8;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+        
+        td {
+            background: transparent;
+            transition: background 0.2s ease;
+        }
+        
+        tr:hover td {
+            background: rgba(74, 140, 45, 0.1);
+        }
+        
+        .highlight { 
+            background: transparent; 
+            color: #4a8c2d; 
+            padding: 2px 6px; 
+            border: 1px solid #4a8c2d;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+        }
+        
+        .diff { 
+            background: transparent; 
+            padding: 15px 20px 15px 24px; 
+            border-top: 2px solid #111;
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        .diff::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #4a8c2d;
+        }
+        
+        .diff strong {
+            color: #4a8c2d;
+            letter-spacing: 0.02em;
+        }
+        
+        .report > table {
+            margin: 20px 0;
+            width: 100%;
+        }
+        
+        .report > p:last-child {
+            margin-top: 30px; 
+            color: #555; 
+            border-top: 1px solid #111; 
+            padding-top: 15px;
+            font-size: 11px;
+            line-height: 1.8;
+            letter-spacing: 0.02em;
+        }
+        
+        /* 对话框样式 */
+        .dialog-overlay {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(17, 17, 17, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .dialog-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .dialog-box {
+            background: #f1efe8;
+            border: 2px solid #111;
+            border-bottom: none;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .dialog-overlay.active .dialog-box {
+            transform: translateY(0);
+        }
+        
+        .dialog-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #4a8c2d;
+        }
+        
+        .dialog-content {
+            padding-left: 16px;
+        }
+        
+        .dialog-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #4a8c2d;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .dialog-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #111;
+            margin-bottom: 20px;
+            letter-spacing: -0.01em;
+        }
+        
+        .dialog-btn {
+            background: #111;
+            color: #f1efe8;
+            border: 2px solid #111;
+            padding: 10px 24px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .dialog-btn:hover {
+            background: #4a8c2d;
+            border-color: #4a8c2d;
+            transform: translateX(4px);
+        }
+        
+        /* 小标签样式 */
+        .tag {
+            display: inline-block;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            padding: 2px 6px;
+            border: 1px solid #111;
+            margin-right: 4px;
+            font-weight: 600;
+        }
+        
+        .tag-green {
+            border-color: #4a8c2d;
+            color: #4a8c2d;
+        }
     </style>
 </head>
 <body>
+    <!-- 几何装饰元素 -->
+    <div class="deco-circle deco-circle-1"></div>
+    <div class="deco-circle deco-circle-2"></div>
+    <div class="deco-square deco-square-1"></div>
+    <div class="deco-square deco-square-2"></div>
+    <div class="deco-line deco-line-1"></div>
+    <div class="deco-line deco-line-2"></div>
+
     <div class="header">
         <h1>南山市网信办 · 网页快照取证报告</h1>
         <p>申请编号：WXB-2025-1112-078 | 生成时间：2025-11-11 15:30</p>
     </div>
     <div class="report">
         <h2>目标网站：南山市酒店入住查询平台</h2>
-        <p>监测域名：hotel-checkin.nanshan.gov.cn | 所属单位：南山市文旅局酒店业监管科</p>
-        <p>取证时间点：2025-11-10 20:00、2025-11-11 01:00、2025-11-11 15:00</p>
+        <p><span class="tag">域名</span> hotel-checkin.nanshan.gov.cn</p>
+        <p><span class="tag">单位</span> 南山市文旅局酒店业监管科</p>
+        <p><span class="tag tag-green">时间点</span> 2025-11-10 20:00、2025-11-11 01:00、2025-11-11 15:00</p>
 
         <div class="snapshot">
             <div class="time">📸 快照1：2025-11-10 20:00:15（案发核心时段前）</div>
@@ -52,7 +491,7 @@
                 <tr><th>查询功能</th><th>当前状态</th><th>与20:00对比</th></tr>
                 <tr><td>入住记录实时查询</td><td>⚠️ 部分受限</td><td>林静怡记录被标记为"隐私保护"</td></tr>
                 <tr><td>酒店入住率显示</td><td>国际酒店（会场店）：87%</td><td>数据更改幅度大，疑似有异常操作</td></tr>
-                <tr><td>会员信息查询</td><td>林静怡信息：不可见</td><td class="highlight">已被屏蔽</td></tr>
+                <tr><td>会员信息查询</td><td>林静怡信息：不可见</td><td><span class="highlight">已被屏蔽</span></td></tr>
                 <tr><td>数据接口状态</td><td>接口响应延迟</td><td>异常日志生成中</td></tr>
             </table>
             <p><strong>系统日志快照：</strong></p>
@@ -118,5 +557,34 @@
             本报告具有法律效力，未经授权不得传播。
         </p>
     </div>
+
+    <!-- 对话框 -->
+    <div class="dialog-overlay" id="dialogOverlay">
+        <div class="dialog-box">
+            <div class="dialog-content">
+                <span class="dialog-label">System Notification</span>
+                <p class="dialog-text">OS：已经下午15点了，是时候去看看警察那边的线索了</p>
+                <button class="dialog-btn" onclick="closeDialog()">知道了</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 5秒后显示对话框
+        setTimeout(function() {
+            document.getElementById('dialogOverlay').classList.add('active');
+        }, 5000);
+        
+        function closeDialog() {
+            document.getElementById('dialogOverlay').classList.remove('active');
+        }
+        
+        // 点击遮罩层也可以关闭
+        document.getElementById('dialogOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDialog();
+            }
+        });
+    </script>
 </body>
 </html>
