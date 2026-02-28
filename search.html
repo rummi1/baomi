@@ -1271,7 +1271,9 @@
         // ==================== 线索合并规则 ====================
         const MERGE_RULES = [
             { sources: ['n16', 'n15'], result: '确认记者"苞米"即为毕敏。', id: 'clue_1' },
-            { sources: ['n19', 'n31'], result: '林静怡的行动路线，其10日晚是从深南市前往南山市的。', id: 'clue_2a', nextStep: { sources: ['clue_2a', 'n3'], result: '林静怡因车次取消，以及须前往南山市参加展会的原因，被迫改乘了其他车次。', id: 'clue_2' } },
+            { sources: ['n3', 'n20'], result: '确认林静怡前往南山市的原因是为在间隙与翊尘投资开会。', id: 'clue_9' },
+            { sources: ['n11', 'n12'], result: '确认林静怡将参与翊尘投资审计项目的复核工作。', id: 'clue_10' },
+            { sources: ['n19', 'n3'], result: '林静怡的行动路线，其10日晚是从深南市前往南山市的。', id: 'clue_2a', nextStep: { sources: ['clue_2a', 'n31'], result: '林静怡因车次取消，以及须前往南山市参加展会的原因，被迫改乘了其他车次。', id: 'clue_2' } },
             { sources: ['n12', 'n14'], result: '确认林静怡为稀有血型（熊猫血）。', id: 'clue_3' },
             { sources: ['n24', 'n46'], result: '针对稀有血型的非法需求，可能构成杀人动机。', id: 'clue_4' },
             { sources: ['n10', 'n28'], result: '林静怡选择或可能入住提希丰国际酒店的原因。', id: 'clue_5a' },
@@ -1282,7 +1284,7 @@
         ];
 
         // 总线索数量
-        const TOTAL_CLUES = 10;
+        const TOTAL_CLUES = 13;
 
         // ==================== 状态管理 ====================
         let nodes = [];
@@ -1344,9 +1346,9 @@
                 { id: 'n36', text: '【36】', x: -5400, y: 1000, level: 3, parent: 'n2', newsId: 'article_036' },
                 // 四层节点（n2下子节点）
                 { id: 'n43', text: '【43】', x: -8400, y: 1500, level: 4, parent: 'n7', newsId: 'article_043' },
-                { id: 'n20', text: '【20】', x: -7800, y: 1500, level: 4, parent: 'n10', newsId: 'article_020' },
+                { id: 'n20', text: '【20】', x: -7000, y: 1500, level: 4, parent: 'n10', newsId: 'article_020' },
                 { id: 'n28', text: '【28】', x: -7400, y: 1500, level: 4, parent: 'n10', newsId: 'article_028' },
-                { id: 'n32', text: '【32】', x: -7000, y: 1500, level: 4, parent: 'n10', newsId: 'article_032' },
+                { id: 'n32', text: '【32】', x: -7800, y: 1500, level: 4, parent: 'n10', newsId: 'article_032' },
                 { id: 'n19', text: '【19】', x: -4800, y: 1000, level: 3, parent: 'n31', newsId: 'article_019' },
                 // 三层节点（n3下）
                 { id: 'n25', text: '【25】', x: -2400, y: 1000, level: 3, parent: 'n3', newsId: 'article_025' },
