@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>南山市网信办 - 网页快照取证报告</title>
+    <style>
+        body { font-family: 'Microsoft YaHei', sans-serif; margin: 30px; background: #f5f5f5; }
+        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+        .report { background: white; padding: 25px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .snapshot { border: 1px solid #ddd; margin: 20px 0; padding: 15px; background: #fafafa; }
+        .time { color: #e74c3c; font-weight: bold; font-size: 18px; }
+        .diff { background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #34495e; color: white; }
+        .highlight { background: #f8d7da; color: #721c24; padding: 2px 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>南山市网信办 · 网页快照取证报告</h1>
+        <p>申请编号：WXB-2025-1112-078 | 生成时间：2025-11-11 15:30</p>
+    </div>
+    <div class="report">
+        <h2>目标网站：南山市酒店入住查询平台</h2>
+        <p>监测域名：hotel-checkin.nanshan.gov.cn | 所属单位：南山市文旅局酒店业监管科</p>
+        <p>取证时间点：2025-11-10 20:00、2025-11-11 01:00、2025-11-11 15:00</p>
+
+        <div class="snapshot">
+            <div class="time">📸 快照1：2025-11-10 20:00:15（案发核心时段前）</div>
+            <h3>酒店入住查询平台 · 首页快照</h3>
+            <table>
+                <tr><th>查询功能</th><th>当前状态</th></tr>
+                <tr><td>入住记录实时查询</td><td>✅ 正常开放（需验证身份）</td></tr>
+                <tr><td>酒店入住率显示</td><td>国际酒店（会场店）：满房 98%</td></tr>
+                <tr><td>会员信息查询</td><td>可查询：姓名、会员等级、入住记录</td></tr>
+                <tr><td>数据接口状态</td><td>与SBTP系统直连 · 接口响应正常</td></tr>
+            </table>
+            <p><strong>系统日志快照：</strong></p>
+            <pre>
+20:00:00 - 接口调用正常
+20:00:03 - 查询请求：IP 192.168.45.78（提希丰会所内网）
+20:00:05 - 查询目标：林静怡 · 会员信息
+20:00:08 - 返回数据：完整（含联系方式、入住偏好）
+20:00:12 - 接口异常记录：无
+            </pre>
+        </div>
+
+        <div class="snapshot">
+            <div class="time">📸 快照2：2025-11-11 01:00:22</div>
+            <h3>酒店入住查询平台 · 页面变化</h3>
+            <table>
+                <tr><th>查询功能</th><th>当前状态</th><th>与20:00对比</th></tr>
+                <tr><td>入住记录实时查询</td><td>⚠️ 部分受限</td><td>林静怡记录被标记为"隐私保护"</td></tr>
+                <tr><td>酒店入住率显示</td><td>国际酒店（会场店）：87%</td><td>数据更改幅度大，疑似有异常操作</td></tr>
+                <tr><td>会员信息查询</td><td>林静怡信息：不可见</td><td class="highlight">已被屏蔽</td></tr>
+                <tr><td>数据接口状态</td><td>接口响应延迟</td><td>异常日志生成中</td></tr>
+            </table>
+            <p><strong>系统日志快照：</strong></p>
+            <pre>
+00:45:00 - 接口调用：IP 192.168.45.78（提希丰会所内网）
+00:45:03 - 执行操作：修改入住率数据
+00:45:10 - 执行操作：屏蔽会员"林静怡"查询权限
+00:45:18 - 操作账号：SBTP账号（ID:19******78）
+00:45:25 - 操作记录：未关联操作员工号
+00:46:00 - 系统自动告警：检测到非授权修改
+00:46:30 - 告警状态：未被处理
+01:00:00 - 接口响应延迟：3200ms
+            </pre>
+            <div class="diff">
+                ⚠️ 异常检测：检测到数据篡改行为！修改操作来自非授权IP，无工号关联。
+            </div>
+        </div>
+
+        <div class="snapshot">
+            <div class="time">📸 快照3：2025-11-11 15:00:08（案发后）</div>
+            <h3>酒店入住查询平台 · 清理后页面</h3>
+            <table>
+                <tr><th>查询功能</th><th>当前状态</th><th>与01:00对比</th></tr>
+                <tr><td>入住记录实时查询</td><td>✅ 恢复正常</td><td>林静怡记录完全清除</td></tr>
+                <tr><td>酒店入住率显示</td><td>国际酒店（会场店）：87%</td><td>数据与01:00对比无异常</td></tr>
+                <tr><td>会员信息查询</td><td>林静怡信息：<span class="highlight">不存在</span></td><td>记录被彻底删除</td></tr>
+                <tr><td>数据接口状态</td><td>接口正常</td><td>异常日志已被清理</td></tr>
+            </table>
+            <p><strong>系统日志快照：与01:00对比无多于日志内容</strong></p>
+            <div class="diff">
+                🔍 取证发现：案发后系统日志被部分清除，但仍残留IP溯源信息，指向提希丰会所内网。
+                <br><br>
+                <strong>关键证据：</strong>残留日志显示操作账号 SBTP账号 ID:19******78
+            </div>
+        </div>
+
+        <h2>📊 综合取证结论</h2>
+        <table>
+            <tr><th>时间节点</th><th>平台状态</th><th>关键操作</th><th>关联证据</th></tr>
+            <tr>
+                <td>20:00（案发前）</td>
+                <td>正常</td>
+                <td>提希丰内网IP查询林静怡信息</td>
+                <td>为后续作案做信息准备</td>
+            </tr>
+            <tr>
+                <td>22:00（案发中）</td>
+                <td>数据篡改</td>
+                <td>屏蔽林静怡信息，修改入住率</td>
+                <td>SBTP账号 ID:19******78</td>
+            </tr>
+            <tr>
+                <td>01:00（案发后）</td>
+                <td>痕迹清理</td>
+                <td>彻底删除林静怡所有记录</td>
+                <td>残留IP 192.168.45.78</td>
+            </tr>
+        </table>
+
+        <p style="margin-top: 30px; color: #666; border-top: 1px solid #ddd; padding-top: 15px;">
+            报告生成单位：南山市网信办 网络信息管理处<br>
+            取证人员：李XX（执法证号：XXXXXXXXXX）<br>
+            本报告具有法律效力，未经授权不得传播。
+        </p>
+    </div>
+</body>
+</html>
