@@ -730,7 +730,7 @@
             position: absolute;
             top: 80px;
             right: 20px;
-            background: #2a2a2a;
+            background: #ffffff;
             border: 3px solid #ff0040;
             padding: 15px;
             font-size: 12px;
@@ -766,10 +766,10 @@
         .final-clue-item {
             margin-bottom: 12px;
             padding: 10px;
-            background: #1a1a1a;
+            background: #fffefe;
             border: 2px solid #444;
             border-left: 4px solid #ff0040;
-            color: #f0f0f0;
+            color: #000000;
         }
 
         .final-clue-item h4 {
@@ -1203,7 +1203,7 @@
 
                 <!-- 最终线索面板 -->
                 <div id="final-clue-panel">
-                    <h3>🔐 终极线索已解锁</h3>
+                    <h3>🔐 新的线索已解锁</h3>
                     <div id="final-clue-list"></div>
                 </div>
 
@@ -1276,15 +1276,15 @@
             { sources: ['n19', 'n3'], result: '林静怡的行动路线，其10日晚是从深南市前往南山市的。', id: 'clue_2a', nextStep: { sources: ['clue_2a', 'n31'], result: '林静怡因车次取消，以及须前往南山市参加展会的原因，被迫改乘了其他车次。', id: 'clue_2' } },
             { sources: ['n12', 'n14'], result: '确认林静怡为稀有血型（熊猫血）。', id: 'clue_3' },
             { sources: ['n24', 'n46'], result: '针对稀有血型的非法需求，可能构成杀人动机。', id: 'clue_4' },
-            { sources: ['n10', 'n28'], result: '林静怡选择或可能入住提希丰国际酒店的原因。', id: 'clue_5a' },
-            { sources: ['n20', 'n29'], result: '林静怡选择或可能入住提希丰国际酒店的原因。', id: 'clue_5b' },
+            { sources: ['n20', 'n32'], result: '林静怡选择或可能入住国际酒店的原因。', id: 'clue_5a' },
+            { sources: ['n32', 'n29'], result: '林静怡选择或可能前往“提希丰”高端养生会所的原因。', id: 'clue_5b' },
             { sources: ['n47', 'n44'], result: '死者丈夫周变在案发时间（11月10日晚）的动向，可考虑作为排除其嫌疑时的依据。', id: 'clue_6' },
             { sources: ['n9', 'n41'], result: '利用理疗舱和特定药物（环苯扎林）结合，可能构成一套作案手法。', id: 'clue_7' },
-            { sources: ['n7', 'n21'], result: 'SBTP系统中可能存在未被清理的幽灵账号，为作案或数据篡改提供可能。', id: 'clue_8' }
+            { sources: ['n21', 'n39'], result: '“谣言”或将反面映证了SBTP系统的测试账号回收率有可能不是100%，为作案或数据篡改提供可能。', id: 'clue_8' }
         ];
 
         // 总线索数量
-        const TOTAL_CLUES = 13;
+        const TOTAL_CLUES = 12;
 
         // ==================== 状态管理 ====================
         let nodes = [];
@@ -2164,11 +2164,21 @@
 
             list.innerHTML = `
                 <div class="final-clue-item">
-                    <h4>🔐 终极密码已破解</h4>
-                    <p>恭喜！您已发现所有线索，成功还原案件真相。</p>
+                    <h4>🗝️ 第一条线索：神秘口令</h4>
+                    <p>你获得了三个关键口令：</p>
                     <div class="password-list">
-                        <span class="password-tag">真相大白</span>
+                        <span class="password-tag">能耗数据</span>
+                        <span class="password-tag">清朗监测</span>
+                        <span class="password-tag">智慧入住</span>
                     </div>
+                </div>
+                <div class="final-clue-item">
+                    <h4>📧 第二条线索：邮箱指令</h4>
+                    <p>结合新闻 <strong>【28】</strong>、<strong>【28】</strong>、<strong>【36】</strong> 的内容，</p>
+                    <p>点击邮箱侧边栏的联系人，在邮箱中发送对应口令以获取新的线索。</p>
+                    <p style="margin-top:10px; color:#daa520; font-size:12px;">
+                        * 提示：仔细分析这三条新闻的内容，找出与口令相关的信息
+                    </p>
                 </div>
             `;
 
