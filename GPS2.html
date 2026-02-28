@@ -687,6 +687,7 @@
             pointer-events: none;
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <!-- 几何装饰背景 -->
@@ -769,14 +770,13 @@
                         <p class="hint-text">输入单词后按 ENTER 提交 | 第4行第3格预置F | 第5行第1格U第5格X预置</p>
                     </div>
                     <div class="data-stream">
-                        LAT:22.5198<br>
-                        LON:113.9512<br>
-                        SPD:000<br>
-                        ALT:012<br>
-                        SAT:08<br>
-                        HDG:245°<br>
-                        ACC:0.8m<br>
-                        TME:234156
+                        WORDLE规则：<br>
+                        绿色：字母正确且位置正确<br>
+                        黄色：字母正确但位置错误<br>
+                        灰色：字母不存在于目标单词中
+                        注意：<br>
+                        输入单词需要在wordle database中出现过，即必须是合理单词<br>
+                        相关单词库请自行进行外部搜索哦！<br>
                     </div>
                 </div>
             </div>
@@ -1126,15 +1126,26 @@
 
             if (key === 'ENTER') submitGuess();
             else if (key === 'BACK' || key === 'BACKSPACE') {
-                // 找到上一个可输入的位置
-                const prevCol = getPrevInputCol(currentRow, currentCol - 1);
-                if (prevCol >= 0) {
-                    currentCol = prevCol;
-                    grid[currentRow][currentCol].textContent = '';
-                    grid[currentRow][currentCol].classList.remove('filled');
-                    // 继续寻找下一个可输入位置
-                    const nextCol = getNextInputCol(currentRow, currentCol + 1);
-                    currentCol = nextCol >= 0 ? nextCol : prevCol + 1;
+                // 找到当前实际有内容的位置（从currentCol-1开始往回找）
+                let targetCol = -1;
+                for (let c = currentCol - 1; c >= 0; c--) {
+                    if (!isPresetCell(currentRow, c) && grid[currentRow][c].textContent !== '') {
+                        targetCol = c;
+                        break;
+                    }
+                }
+
+                // 如果找到了有内容的格子，清除它
+                if (targetCol >= 0) {
+                    grid[currentRow][targetCol].textContent = '';
+                    grid[currentRow][targetCol].classList.remove('filled');
+                    currentCol = targetCol;
+                } else {
+                    // 没找到有内容的，就找上一个可输入的空位置
+                    const prevCol = getPrevInputCol(currentRow, currentCol - 1);
+                    if (prevCol >= 0) {
+                        currentCol = prevCol;
+                    }
                 }
             } else if (key.length === 1) {
                 // 找到下一个可输入的位置
